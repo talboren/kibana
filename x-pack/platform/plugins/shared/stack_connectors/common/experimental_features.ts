@@ -16,6 +16,7 @@ export const allowedExperimentalValues = Object.freeze({
   sentinelOneConnectorOn: true,
   crowdstrikeConnectorOn: true,
   inferenceConnectorOff: false,
+  keepConnectorOff: false,
   crowdstrikeConnectorRTROn: true,
   microsoftDefenderEndpointOn: true,
 });

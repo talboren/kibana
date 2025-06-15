@@ -22,6 +22,7 @@ import { getConnectorType as getOpenAIConnectorType } from './openai';
 import { getConnectorType as getBedrockConnectorType } from './bedrock';
 import { getConnectorType as getGeminiConnectorType } from './gemini';
 import { getConnectorType as getInferenceConnectorType } from './inference';
+import { getConnectorType as getKeepConnectorType } from './keep';
 import { getConnectorType as getPagerDutyConnectorType } from './pagerduty';
 import { getConnectorType as getSwimlaneConnectorType } from './swimlane';
 import { getConnectorType as getServerLogConnectorType } from './server_log';
@@ -123,6 +124,9 @@ export function registerConnectorTypes({
   }
   if (!experimentalFeatures.inferenceConnectorOff) {
     actions.registerSubActionConnectorType(getInferenceConnectorType());
+  }
+  if (!experimentalFeatures.keepConnectorOff) {
+    actions.registerSubActionConnectorType(getKeepConnectorType());
   }
   if (experimentalFeatures.microsoftDefenderEndpointOn) {
     actions.registerSubActionConnectorType(getMicrosoftDefenderEndpointConnectorType());

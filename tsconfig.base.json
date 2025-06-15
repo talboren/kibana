@@ -1158,6 +1158,8 @@
       "@kbn/kbn-tp-custom-visualizations-plugin/*": ["src/platform/test/plugin_functional/plugins/kbn_tp_custom_visualizations/*"],
       "@kbn/kbn-tp-run-pipeline-plugin": ["src/platform/test/interpreter_functional/plugins/kbn_tp_run_pipeline"],
       "@kbn/kbn-tp-run-pipeline-plugin/*": ["src/platform/test/interpreter_functional/plugins/kbn_tp_run_pipeline/*"],
+      "@kbn/keep-endpoint-ui-common": ["x-pack/platform/packages/shared/kbn-keep-endpoint-ui-common"],
+      "@kbn/keep-endpoint-ui-common/*": ["x-pack/platform/packages/shared/kbn-keep-endpoint-ui-common/*"],
       "@kbn/key-value-metadata-table": ["x-pack/platform/packages/shared/kbn-key-value-metadata-table"],
       "@kbn/key-value-metadata-table/*": ["x-pack/platform/packages/shared/kbn-key-value-metadata-table/*"],
       "@kbn/kibana-api-cli": ["x-pack/platform/packages/shared/kbn-kibana-api-cli"],

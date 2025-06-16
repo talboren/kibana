@@ -7,7 +7,7 @@
 
 import { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { isEmpty } from 'lodash/fp';
-import { Config, ConfigEntryView, FieldType, KeepProvider } from '../types/types';
+import { ConfigEntryView, FieldType, KeepProvider } from '../types/types';
 import * as LABELS from '../translations';
 
 export interface TaskTypeOption {
@@ -23,7 +23,7 @@ export const getTaskTypeOptions = (taskTypes: string[]): TaskTypeOption[] =>
     value: taskType,
   }));
 
-export const generateInferenceEndpointId = (config: Config) => {
+export const generateInferenceEndpointId = (config: { taskType?: string; provider: string }) => {
   const taskTypeSuffix = config.taskType ? `${config.taskType}-` : '';
   const inferenceEndpointId = `${config.provider}-${taskTypeSuffix}${Math.random()
     .toString(36)
@@ -77,28 +77,21 @@ export const getNonEmptyValidator = (
   };
 };
 
-export const mapProviderFields = (
-  taskType: string,
-  newProvider: KeepProvider
-): ConfigEntryView[] => {
-  return Object.keys(newProvider.configurations ?? {})
-    .filter((pk) =>
-      (newProvider.configurations[pk].supported_task_types ?? [taskType]).includes(taskType)
-    )
-    .map(
-      (k): ConfigEntryView => ({
-        key: k,
-        isValid: true,
-        validationErrors: [],
-        value: newProvider.configurations[k].default_value ?? null,
-        default_value: newProvider.configurations[k].default_value ?? null,
-        description: newProvider.configurations[k].description ?? null,
-        label: newProvider.configurations[k].label ?? '',
-        required: newProvider.configurations[k].required ?? false,
-        sensitive: newProvider.configurations[k].sensitive ?? false,
-        updatable: newProvider.configurations[k].updatable ?? false,
-        type: newProvider.configurations[k].type ?? FieldType.STRING,
-        supported_task_types: newProvider.configurations[k].supported_task_types ?? [],
-      })
-    );
+export const mapProviderFields = (newProvider: KeepProvider): ConfigEntryView[] => {
+  return Object.keys(newProvider.config ?? {}).map(
+    (k): ConfigEntryView => ({
+      key: k,
+      isValid: true,
+      validationErrors: [],
+      value: newProvider.config[k].default ?? null,
+      default_value: newProvider.config[k].default ?? null,
+      description: newProvider.config[k].description ?? null,
+      label: k.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase()),
+      required: newProvider.config[k].required ?? false,
+      sensitive: newProvider.config[k].sensitive ?? false,
+      updatable: true,
+      type: FieldType.STRING,
+      supported_task_types: newProvider.tags ?? [],
+    })
+  );
 };

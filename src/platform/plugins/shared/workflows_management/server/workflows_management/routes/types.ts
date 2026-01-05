@@ -8,6 +8,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { ExecutionStatus, ExecutionType } from '@kbn/workflows';
 import type { WorkflowsRouter } from '../../types';
@@ -45,6 +46,7 @@ export interface RouteDependencies {
   api: WorkflowsManagementApi;
   logger: Logger;
   spaces: SpacesServiceStart;
+  getInference?: () => InferenceServerStart | undefined;
 }
 
 export type RouteHandler = (deps: RouteDependencies) => void;

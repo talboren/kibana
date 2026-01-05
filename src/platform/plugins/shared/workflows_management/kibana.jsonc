@@ -31,7 +31,8 @@
     ],
     "optionalPlugins": [
       "alerting",
-      "serverless"
+      "serverless",
+      "inference"
     ]
   }
 }

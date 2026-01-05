@@ -31,6 +31,7 @@ import {
   useTriggerTypeDecorations,
 } from './decorations';
 import { useWorkflowYamlCompletionProvider } from './hooks/use_workflow_yaml_completion_provider';
+import { WorkflowInlineCompletionsProvider } from '../lib/inline_completions/workflow_inline_completions_provider';
 import { StepActions } from './step_actions';
 import { WorkflowYamlValidationAccordion } from './workflow_yaml_validation_accordion';
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
@@ -130,6 +131,10 @@ const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   },
   formatOnType: true,
   suggestLineHeight: 25, // default 21 + 4px for padding
+  inlineSuggest: {
+    enabled: true,
+    mode: 'prefix',
+  },
 };
 
 export interface WorkflowYAMLEditorProps {
@@ -361,6 +366,38 @@ export const WorkflowYAMLEditor = ({
         // Register the unified hover provider for API documentation and template expressions
         const hoverDisposable = registerUnifiedHoverProvider(providerConfig);
         disposablesRef.current.push(hoverDisposable);
+
+        // Register inline completions provider for AI-powered suggestions
+        console.log('[WorkflowCopilot] Registering inline completions provider');
+        const inlineCompletionsProvider = new WorkflowInlineCompletionsProvider({
+          http,
+          connectorId: '@default',
+          getAvailableConnectors: async () => {
+            try {
+              const response = await http.get<{
+                connectorTypes: Record<string, Array<{ id: string; name: string }>>;
+              }>('/api/workflows/connectors');
+              
+              // Flatten the connectors by type into a single array
+              const connectors: Array<{ id: string; name: string; type: string }> = [];
+              for (const [type, conns] of Object.entries(response.connectorTypes)) {
+                conns.forEach((conn) => {
+                  connectors.push({ ...conn, type });
+                });
+              }
+              return connectors;
+            } catch (error) {
+              console.warn('[WorkflowCopilot] Failed to fetch connectors:', error);
+              return [];
+            }
+          },
+        });
+        const inlineDisposable = monaco.languages.registerInlineCompletionsProvider(
+          YAML_LANG_ID,
+          inlineCompletionsProvider
+        );
+        disposablesRef.current.push(inlineDisposable);
+        console.log('[WorkflowCopilot] Inline completions provider registered successfully');
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -8,6 +8,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 
 // Import all route registration functions
@@ -22,6 +23,7 @@ import { registerGetWorkflowExecutionLogsRoute } from './get_workflow_execution_
 import { registerGetWorkflowExecutionsRoute } from './get_workflow_executions';
 import { registerGetWorkflowJsonSchemaRoute } from './get_workflow_json_schema';
 import { registerGetWorkflowStatsRoute } from './get_workflow_stats';
+import { registerPostAiCompleteRoute } from './post_ai_complete';
 import { registerPostCancelWorkflowExecutionRoute } from './post_cancel_workflow_execution';
 import { registerPostCloneWorkflowRoute } from './post_clone_workflow';
 import { registerPostCreateWorkflowRoute } from './post_create_workflow';
@@ -38,9 +40,10 @@ export function defineRoutes(
   router: WorkflowsRouter,
   api: WorkflowsManagementApi,
   logger: Logger,
-  spaces: SpacesServiceStart
+  spaces: SpacesServiceStart,
+  getInference?: () => InferenceServerStart | undefined
 ) {
-  const deps: RouteDependencies = { router, api, logger, spaces };
+  const deps: RouteDependencies = { router, api, logger, spaces, getInference };
 
   // Register all routes
   registerGetWorkflowStatsRoute(deps);
@@ -62,4 +65,9 @@ export function defineRoutes(
   registerGetWorkflowExecutionLogsRoute(deps);
   registerGetStepExecutionRoute(deps);
   registerGetWorkflowJsonSchemaRoute(deps);
+  
+  // Register AI completion route if inference is available
+  if (getInference) {
+    registerPostAiCompleteRoute({ ...deps, getInference });
+  }
 }

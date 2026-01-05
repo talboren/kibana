@@ -18,7 +18,7 @@ import type {
 } from '@kbn/alerting-plugin/server';
 import type { CustomRequestHandlerContext, IRouter } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -55,6 +55,7 @@ export interface WorkflowsServerPluginStartDeps {
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
+  inference?: InferenceServerStart;
 }
 
 export type WorkflowsRequestHandlerContext = CustomRequestHandlerContext<{

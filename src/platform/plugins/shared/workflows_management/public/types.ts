@@ -11,6 +11,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { InferencePublicStart } from '@kbn/inference-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
@@ -42,6 +43,7 @@ export interface WorkflowsPublicPluginStartDependencies {
   spaces: SpacesPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   workflowsExtensions: WorkflowsExtensionsPublicPluginStart;
+  inference?: InferencePublicStart;
 }
 
 export interface WorkflowsPublicPluginStartAdditionalServices {

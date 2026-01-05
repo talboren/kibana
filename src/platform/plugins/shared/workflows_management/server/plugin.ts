@@ -54,6 +54,7 @@ export class WorkflowsPlugin
   private workflowTaskScheduler: WorkflowTaskScheduler | null = null;
   private api: WorkflowsManagementApi | null = null;
   private spaces?: SpacesServiceStart | null = null;
+  private pluginsStart: WorkflowsServerPluginStartDeps | null = null;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -180,8 +181,11 @@ export class WorkflowsPlugin
     this.logger.debug('Workflows Management: Creating router');
     const router = core.http.createRouter<WorkflowsRequestHandlerContext>();
 
+    // Create a getter for inference plugin that will be available after start
+    const getInference = () => this.pluginsStart?.inference;
+
     // Register server side APIs
-    defineRoutes(router, this.api, this.logger, this.spaces);
+    defineRoutes(router, this.api, this.logger, this.spaces, getInference);
 
     return {
       management: this.api,
@@ -190,6 +194,9 @@ export class WorkflowsPlugin
 
   public start(core: CoreStart, plugins: WorkflowsServerPluginStartDeps) {
     this.logger.debug('Workflows Management: Start');
+
+    // Store plugins start for inference access
+    this.pluginsStart = plugins;
 
     stepSchemas.initialize(plugins.workflowsExtensions);
 

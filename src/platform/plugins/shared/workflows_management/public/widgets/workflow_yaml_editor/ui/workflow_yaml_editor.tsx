@@ -618,6 +618,7 @@ export const WorkflowYAMLEditor = ({
           options={options}
           schemas={schemas}
           value={workflowYaml}
+          enableFindAction={true}
         />
       </div>
       <div css={styles.validationErrorsContainer}>

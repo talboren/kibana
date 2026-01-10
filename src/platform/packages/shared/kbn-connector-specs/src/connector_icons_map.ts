@@ -48,4 +48,8 @@ export const ConnectorIconsMap: Map<
     '.jina',
     lazy(() => import(/* webpackChunkName: "connectorIconJina" */ './specs/jina/icon/jina')),
   ],
+  [
+    '.aws_ec2',
+    lazy(() => import(/* webpackChunkName: "connectorIconAwsEc2" */ './specs/aws_ec2/icon')),
+  ],
 ]);

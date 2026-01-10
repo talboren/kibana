@@ -9,6 +9,7 @@
 
 export * from './specs/abuseipdb/abuseipdb';
 export * from './specs/alienvault_otx/alienvault_otx';
+export * from './specs/aws_ec2/aws_ec2';
 export * from './specs/brave_search/brave_search';
 export * from './specs/github/github';
 export * from './specs/greynoise/greynoise';

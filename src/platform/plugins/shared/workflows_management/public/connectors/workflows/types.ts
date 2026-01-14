@@ -16,5 +16,10 @@ export interface WorkflowsActionParams {
   subActionParams: {
     workflowId: string;
     summaryMode?: boolean;
+    alertStates?: {
+      new?: boolean;
+      ongoing?: boolean;
+      recovered?: boolean;
+    };
   };
 }

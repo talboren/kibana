@@ -20,6 +20,11 @@ export interface RunWorkflowParams {
   workflowId: string;
   spaceId: string;
   summaryMode?: boolean;
+  alertStates?: {
+    new?: boolean;
+    ongoing?: boolean;
+    recovered?: boolean;
+  };
   inputs: {
     event: {
       alerts: AlertHit[];

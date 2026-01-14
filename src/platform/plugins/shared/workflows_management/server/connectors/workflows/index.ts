@@ -170,16 +170,36 @@ export function getWorkflowsConnectorAdapter(): ConnectorAdapter<
           throw new Error(`Missing subActionParams. Received: ${JSON.stringify(params)}`);
         }
 
-        const { workflowId, summaryMode = true } = subActionParams;
+        const {
+          workflowId,
+          summaryMode = true,
+          alertStates = { new: true, ongoing: true, recovered: false },
+        } = subActionParams;
         if (!workflowId) {
           throw new Error(
             `Missing required workflowId parameter. Received params: ${JSON.stringify(params)}`
           );
         }
 
+        // Filter alerts based on selected states
+        const filteredAlerts = {
+          new:
+            alertStates.new !== false
+              ? alerts.new
+              : { count: 0, data: [], alert_count: { active: 0, recovered: 0, ignored: 0 } },
+          ongoing:
+            alertStates.ongoing !== false
+              ? alerts.ongoing
+              : { count: 0, data: [], alert_count: { active: 0, recovered: 0, ignored: 0 } },
+          recovered:
+            alertStates.recovered === true
+              ? alerts.recovered
+              : { count: 0, data: [], alert_count: { active: 0, recovered: 0, ignored: 0 } },
+        };
+
         // Build alert event using shared utility function
         const alertEvent = buildAlertEvent({
-          alerts,
+          alerts: filteredAlerts,
           rule,
           ruleUrl,
           spaceId,
@@ -192,6 +212,7 @@ export function getWorkflowsConnectorAdapter(): ConnectorAdapter<
             inputs: { event: alertEvent },
             spaceId,
             summaryMode,
+            alertStates,
           },
         };
       } catch (error) {
@@ -201,6 +222,7 @@ export function getWorkflowsConnectorAdapter(): ConnectorAdapter<
             workflowId: params?.subActionParams?.workflowId || 'unknown',
             spaceId,
             summaryMode: params?.subActionParams?.summaryMode ?? true,
+            alertStates: params?.subActionParams?.alertStates,
           },
         };
       }

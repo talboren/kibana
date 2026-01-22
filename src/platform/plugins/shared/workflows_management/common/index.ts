@@ -18,3 +18,10 @@ export const WORKFLOWS_STEP_EXECUTIONS_INDEX = '.workflows-step-executions';
 // Import directly from './elasticsearch_request_builder' if needed
 
 // DO NOT IMPORT MODULES HERE. Otherwise it will inflate the initial plugin bundle size.
+
+// Export workflow template types
+export type {
+  WorkflowTemplate,
+  WorkflowTemplatesResponse,
+  WorkflowTemplatesQuery,
+} from './types/workflow_template';

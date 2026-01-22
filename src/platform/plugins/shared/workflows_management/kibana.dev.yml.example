@@ -1,0 +1,13 @@
+# Example Kibana development configuration for Workflow Template Library
+# Copy this to your kibana.dev.yml and update with your values
+
+# Enable workflows UI
+uiSettings.overrides:
+  workflows:ui:enabled: true
+
+# Configure GitHub authentication for template library (required for private repos)
+workflowsManagement:
+  templateLibrary:
+    # GitHub Personal Access Token with 'repo' scope
+    # Create at: https://github.com/settings/tokens
+    githubToken: 'ghp_your_github_token_here'

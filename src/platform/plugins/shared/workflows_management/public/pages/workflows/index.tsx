@@ -9,6 +9,7 @@
 
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
@@ -46,6 +47,10 @@ export function WorkflowsPage() {
     application.navigateToApp(PLUGIN_ID, { path: '/create' });
   }, [application]);
 
+  const navigateToTemplateLibrary = useCallback(() => {
+    application.navigateToApp(PLUGIN_ID, { path: '/templates' });
+  }, [application]);
+
   const { data: workflows } = useWorkflows(search);
   useWorkflowsBreadcrumbs();
 
@@ -75,21 +80,32 @@ export function WorkflowsPage() {
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup>
-              {canCreateWorkflow && (
-                <EuiButton
-                  iconType="plusInCircle"
-                  color="primary"
-                  size="m"
-                  fill
-                  onClick={navigateToCreateWorkflow}
-                >
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty iconType="documents" size="m" onClick={navigateToTemplateLibrary}>
                   <FormattedMessage
-                    id="workflows.createWorkflowButton"
-                    defaultMessage="Create a new workflow"
+                    id="workflows.templateLibraryButton"
+                    defaultMessage="Template Library"
                     ignoreTag
                   />
-                </EuiButton>
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              {canCreateWorkflow && (
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    iconType="plusInCircle"
+                    color="primary"
+                    size="m"
+                    fill
+                    onClick={navigateToCreateWorkflow}
+                  >
+                    <FormattedMessage
+                      id="workflows.createWorkflowButton"
+                      defaultMessage="Create a new workflow"
+                      ignoreTag
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
               )}
             </EuiFlexGroup>
           </EuiFlexItem>

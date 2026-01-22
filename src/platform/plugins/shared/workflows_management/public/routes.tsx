@@ -16,6 +16,7 @@ import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { WorkflowDetailStoreProvider } from './entities/workflows/store/provider';
 import { useCapabilities } from './hooks/use_capabilities';
 import { WorkflowDetailPage } from './pages/workflow_detail';
+import { WorkflowTemplatesPage } from './pages/workflow_templates';
 import { WorkflowsPage } from './pages/workflows';
 import { AccessDenied } from '../common/components/access_denied';
 
@@ -55,6 +56,7 @@ export const WorkflowsRoutes = React.memo<WorkflowsAppDeps>(({ history }) => (
     <I18nProvider>
       <WorkflowsReadPermissionsWrapper>
         <Routes>
+          <Route path="/templates" exact component={WorkflowTemplatesPage} />
           <Route path={['/create', '/:id']} component={WorkflowDetailPageRoute} />
           <Route path="/" exact component={WorkflowsPage} />
         </Routes>

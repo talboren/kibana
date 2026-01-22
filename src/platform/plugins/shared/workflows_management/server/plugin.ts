@@ -20,6 +20,7 @@ import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { TriggerType } from '@kbn/workflows';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows/types/latest';
 
+import type { WorkflowsManagementConfig } from './config';
 import {
   getWorkflowsConnectorAdapter,
   getConnectorType as getWorkflowsConnectorType,
@@ -50,6 +51,7 @@ export class WorkflowsPlugin
     >
 {
   private readonly logger: Logger;
+  private readonly config: WorkflowsManagementConfig;
   private workflowsService: WorkflowsService | null = null;
   private workflowTaskScheduler: WorkflowTaskScheduler | null = null;
   private api: WorkflowsManagementApi | null = null;
@@ -57,6 +59,7 @@ export class WorkflowsPlugin
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
+    this.config = initializerContext.config.get<WorkflowsManagementConfig>();
   }
 
   public setup(
@@ -170,7 +173,15 @@ export class WorkflowsPlugin
 
     this.workflowsService = new WorkflowsService(this.logger, getCoreStart, getPluginsStart);
 
-    this.api = new WorkflowsManagementApi(this.workflowsService, getWorkflowExecutionEngine);
+    // Get GitHub token from config for template library
+    const githubToken = this.config.templateLibrary?.githubToken;
+
+    this.api = new WorkflowsManagementApi(
+      this.workflowsService,
+      getWorkflowExecutionEngine,
+      this.logger,
+      githubToken
+    );
     this.spaces = plugins.spaces?.spacesService;
 
     if (!this.spaces) {

@@ -16,6 +16,9 @@ const configSchema = schema.object({
   logging: schema.object({
     console: schema.boolean({ defaultValue: false }),
   }),
+  templateLibrary: schema.object({
+    githubToken: schema.maybe(schema.string()),
+  }),
 });
 
 export type WorkflowsManagementConfig = TypeOf<typeof configSchema>;

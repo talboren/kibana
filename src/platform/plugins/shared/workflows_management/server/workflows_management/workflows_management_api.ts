@@ -38,9 +38,11 @@ import type {
   SearchWorkflowExecutionsParams,
   WorkflowsService,
 } from './workflows_management_service';
+import type { WorkflowTemplate } from '../../common';
 import { WorkflowValidationError } from '../../common/lib/errors';
 import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
 import { parseWorkflowYamlToJSON, stringifyWorkflowDefinition } from '../../common/lib/yaml';
+import { GitHubWorkflowsService } from '../lib/github_workflows_service';
 
 export interface GetWorkflowsParams {
   triggerType?: 'schedule' | 'event' | 'manual';
@@ -113,10 +115,16 @@ export interface TestWorkflowParams {
 }
 
 export class WorkflowsManagementApi {
+  private readonly githubWorkflowsService: GitHubWorkflowsService;
+
   constructor(
     private readonly workflowsService: WorkflowsService,
-    private readonly getWorkflowsExecutionEngine: () => Promise<WorkflowsExecutionEnginePluginStart>
-  ) {}
+    private readonly getWorkflowsExecutionEngine: () => Promise<WorkflowsExecutionEnginePluginStart>,
+    logger: any,
+    githubToken?: string
+  ) {
+    this.githubWorkflowsService = new GitHubWorkflowsService(logger, githubToken);
+  }
 
   public async getWorkflows(params: GetWorkflowsParams, spaceId: string): Promise<WorkflowListDto> {
     return this.workflowsService.getWorkflows(params, spaceId);
@@ -124,6 +132,10 @@ export class WorkflowsManagementApi {
 
   public async getWorkflow(id: string, spaceId: string): Promise<WorkflowDetailDto | null> {
     return this.workflowsService.getWorkflow(id, spaceId);
+  }
+
+  public async getWorkflowTemplates(): Promise<WorkflowTemplate[]> {
+    return this.githubWorkflowsService.getWorkflowTemplates();
   }
 
   public async createWorkflow(

@@ -9,8 +9,10 @@
 
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useState } from 'react';
+import { parse } from 'query-string';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { workflowDefaultYaml } from './workflow_default_yml';
@@ -19,6 +21,7 @@ import { WorkflowDetailHeader } from './workflow_detail_header';
 import { WorkflowEditorLayout } from './workflow_detail_layout';
 import { WorkflowDetailLoadingState } from './workflow_detail_loading_state';
 import { WorkflowDetailTestModal } from './workflow_detail_test_modal';
+import { useWorkflowTemplate } from '../../../entities/workflow_templates/api/use_workflow_templates';
 import { setActiveTab, setExecution, setYamlString } from '../../../entities/workflows/store';
 import {
   selectActiveTab,
@@ -34,12 +37,22 @@ import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 
 export function WorkflowDetailPage({ id }: { id?: string }) {
   const dispatch = useDispatch();
+  const location = useLocation();
   const [loadConnectors, { isLoading: isLoadingConnectors }] =
     useAsyncThunkState(loadConnectorsThunk);
   const [loadWorkflow, { isLoading: isLoadingWorkflow, error }] =
     useAsyncThunkState(loadWorkflowThunk);
 
-  const isReady = !isLoadingWorkflow && !isLoadingConnectors;
+  // Get template ID from URL query parameters
+  const templateId = useMemo(() => {
+    const params = parse(location.search);
+    return params.template as string | undefined;
+  }, [location.search]);
+
+  // Fetch template if templateId is present
+  const { data: template, isLoading: isLoadingTemplate } = useWorkflowTemplate(templateId);
+
+  const isReady = !isLoadingWorkflow && !isLoadingConnectors && !isLoadingTemplate;
 
   const activeTabInStore = useSelector(selectActiveTab);
   const workflowName = useSelector(selectWorkflowName);
@@ -52,14 +65,18 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     loadConnectors(); // dispatch load connectors on mount
   }, [loadConnectors]);
 
-  // Load workflow when id changes
+  // Load workflow when id changes, or load template if templateId is present
   useEffect(() => {
     if (id) {
       loadWorkflow({ id }); // sets loaded yaml string
-    } else {
+    } else if (template?.yamlContent) {
+      // Load template YAML into editor
+      dispatch(setYamlString(template.yamlContent));
+    } else if (!templateId) {
+      // Only use default YAML if no template is being loaded
       dispatch(setYamlString(workflowDefaultYaml));
     }
-  }, [loadWorkflow, id, dispatch]);
+  }, [loadWorkflow, id, dispatch, template, templateId]);
 
   // Sync activeTab from URL state to store
   useEffect(() => {

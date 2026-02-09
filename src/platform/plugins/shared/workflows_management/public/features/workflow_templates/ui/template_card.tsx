@@ -7,16 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiBadge,
-  EuiCard,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiText,
-  EuiToolTip,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiPanel, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -36,7 +27,6 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({ template }) => {
   const { application } = useKibana().services;
 
   const handleUseTemplate = useCallback(() => {
-    // Navigate to workflow editor with template parameter
     application.navigateToApp(PLUGIN_ID, {
       path: `/create?template=${encodeURIComponent(template.id)}`,
     });
@@ -46,52 +36,116 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({ template }) => {
   const remainingStepsCount = template.stepTypes.length - MAX_VISIBLE_ICONS;
 
   return (
-    <EuiCard
-      layout="vertical"
-      title={template.name}
-      titleSize="xs"
-      description=""
+    <EuiPanel
       hasBorder
+      hasShadow={false}
+      paddingSize="none"
       onClick={handleUseTemplate}
+      aria-label={template.name}
       css={css`
-        height: 100%;
         display: flex;
         flex-direction: column;
-
-        [class*='euiCard__content'] {
-          display: flex;
-          flex-direction: column;
-          flex-grow: 1;
-        }
-
-        [class*='euiCard__titleButton'] {
-          display: -webkit-box;
-          -webkit-line-clamp: 1;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-          line-height: 1.5;
-          text-align: left;
-        }
-
+        padding: ${euiTheme.size.l};
+        height: 204px;
+        border-radius: ${euiTheme.border.radius.medium};
         cursor: pointer;
+        transition: box-shadow ${euiTheme.animation.fast} ease-in-out;
+
         &:hover {
-          box-shadow: ${euiTheme.levels.flyout};
+          box-shadow: 0 0.9px 4px 0 rgba(0, 0, 0, 0.08), 0 2.6px 8px 0 rgba(0, 0, 0, 0.06);
         }
       `}
     >
-      {/* Description */}
-      <EuiText size="s" color="subdued">
+      {/* Step Icons Row */}
+      <div
+        css={css`
+          display: flex;
+          gap: ${euiTheme.size.base};
+          align-items: flex-start;
+          flex-shrink: 0;
+          width: 100%;
+        `}
+      >
+        {visibleStepTypes.map((stepType, index) => (
+          <EuiToolTip content={stepType} position="top" key={`${stepType}-${index}`}>
+            <div
+              tabIndex={0}
+              css={css`
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+              `}
+            >
+              <StepIcon stepType={stepType} executionStatus={undefined} />
+            </div>
+          </EuiToolTip>
+        ))}
+        {remainingStepsCount > 0 && (
+          <EuiToolTip
+            content={
+              <FormattedMessage
+                id="workflowsManagement.templateLibrary.moreSteps"
+                defaultMessage="{count} more step types"
+                values={{ count: remainingStepsCount }}
+              />
+            }
+            position="top"
+          >
+            <EuiText
+              tabIndex={0}
+              size="xs"
+              color="subdued"
+              css={css`
+                font-weight: ${euiTheme.font.weight.medium};
+                white-space: nowrap;
+              `}
+            >
+              {`+${remainingStepsCount}`}
+            </EuiText>
+          </EuiToolTip>
+        )}
+      </div>
+
+      {/* Title & Description - tightly packed below icons */}
+      <div
+        css={css`
+          display: flex;
+          flex-direction: column;
+          gap: ${euiTheme.size.xs};
+          margin-top: ${euiTheme.size.base};
+          flex-shrink: 0;
+          width: 100%;
+        `}
+      >
+        {/* Title: 14px semi-bold, single line, clipped */}
         <p
           css={css`
+            font-size: 14px;
+            font-weight: ${euiTheme.font.weight.semiBold};
+            line-height: 20px;
+            color: ${euiTheme.colors.textHeading};
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin: 0;
+          `}
+        >
+          {template.name}
+        </p>
+        {/* Description: 13px regular, subdued, 2 lines max */}
+        <p
+          css={css`
+            font-size: 13px;
+            font-weight: ${euiTheme.font.weight.regular};
+            line-height: 18px;
+            color: ${euiTheme.colors.textSubdued};
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
-            text-overflow: ellipsis;
-            line-height: 1.5;
-            text-align: left;
-            min-height: 3em;
-            margin: 0 !important;
+            margin: 0;
           `}
         >
           {template.description || (
@@ -101,124 +155,31 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({ template }) => {
             />
           )}
         </p>
-      </EuiText>
-
-      <EuiSpacer size="m" />
-
-      {/* Step Icons */}
-      <div
-        css={css`
-          min-height: 24px;
-        `}
-      >
-        {template.stepTypes.length > 0 ? (
-          <EuiFlexGroup gutterSize="xs" alignItems="center" wrap={false} responsive={false}>
-            {visibleStepTypes.map((stepType, index) => (
-              <EuiFlexItem grow={false} key={`${stepType}-${index}`}>
-                <EuiToolTip content={stepType} position="top">
-                  <div
-                    tabIndex={0}
-                    css={css`
-                      display: inline-flex;
-                      align-items: center;
-                      justify-content: center;
-                      width: 24px;
-                      height: 24px;
-                    `}
-                  >
-                    <StepIcon stepType={stepType} />
-                  </div>
-                </EuiToolTip>
-              </EuiFlexItem>
-            ))}
-            {remainingStepsCount > 0 && (
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  content={
-                    <FormattedMessage
-                      id="workflowsManagement.templateLibrary.moreSteps"
-                      defaultMessage="{count} more step types"
-                      values={{ count: remainingStepsCount }}
-                    />
-                  }
-                  position="top"
-                >
-                  <EuiText
-                    tabIndex={0}
-                    size="xs"
-                    color="subdued"
-                    css={css`
-                      font-weight: ${euiTheme.font.weight.medium};
-                      white-space: nowrap;
-                    `}
-                  >
-                    {'+'}
-                    {remainingStepsCount}
-                  </EuiText>
-                </EuiToolTip>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        ) : (
-          <EuiText size="xs" color="subdued">
-            <FormattedMessage
-              id="workflowsManagement.templateLibrary.noSteps"
-              defaultMessage="No steps available"
-            />
-          </EuiText>
-        )}
       </div>
 
-      <EuiSpacer size="m" />
-
-      {/* Tags */}
-      <EuiFlexGroup gutterSize="xs" wrap={false} responsive={false} alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiBadge color="hollow">{template.category}</EuiBadge>
-        </EuiFlexItem>
-        {template.tags.slice(0, 2).map((tag) => (
-          <EuiFlexItem grow={false} key={tag}>
-            <EuiBadge
-              color="default"
-              css={css`
-                max-width: 100px;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-              `}
-            >
-              {tag}
-            </EuiBadge>
-          </EuiFlexItem>
-        ))}
-        {template.tags.length > 2 && (
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              content={
-                <div>
-                  {template.tags.slice(2).map((tag) => (
-                    <div key={tag}>{tag}</div>
-                  ))}
-                </div>
-              }
-              position="top"
-            >
-              <EuiText
-                tabIndex={0}
-                size="xs"
-                color="subdued"
-                css={css`
-                  font-weight: ${euiTheme.font.weight.medium};
-                  white-space: nowrap;
-                `}
-              >
-                {'+'}
-                {template.tags.length - 2}
-              </EuiText>
-            </EuiToolTip>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    </EuiCard>
+      {/* Category Badge - pushed to bottom */}
+      <div
+        css={css`
+          display: inline-flex;
+          align-items: center;
+          align-self: flex-start;
+          margin-top: auto;
+          height: 20px;
+          padding: 0 ${euiTheme.size.s};
+          background: ${euiTheme.colors.emptyShade};
+          border: 1px solid ${euiTheme.colors.lightShade};
+          border-radius: 3px;
+          font-size: 12px;
+          font-weight: ${euiTheme.font.weight.medium};
+          line-height: ${euiTheme.size.base};
+          color: ${euiTheme.colors.text};
+          white-space: nowrap;
+          overflow: hidden;
+          flex-shrink: 0;
+        `}
+      >
+        {template.category}
+      </div>
+    </EuiPanel>
   );
 };

@@ -167,7 +167,7 @@ export function WorkflowTemplatesPage() {
               <EuiFlexGrid columns={columnCount} gutterSize="m">
                 {Array.from({ length: 6 }).map((_, i) => (
                   <EuiFlexItem key={i}>
-                    <EuiSkeletonRectangle width="100%" height={140} borderRadius="m" />
+                    <EuiSkeletonRectangle width="100%" height={204} borderRadius="m" />
                   </EuiFlexItem>
                 ))}
               </EuiFlexGrid>

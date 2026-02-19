@@ -14,6 +14,7 @@ import type {
   LowercaseProcessor,
   MathProcessor,
   ProcessorType,
+  RedactProcessor,
   ReplaceProcessor,
   StreamlangConditionBlockWithUIAttributes,
   StreamlangDSL,
@@ -55,6 +56,7 @@ import type {
   ManualIngestPipelineFormState,
   MathFormState,
   ProcessorFormState,
+  RedactFormState,
   ReplaceFormState,
   SetFormState,
   TrimFormState,
@@ -72,6 +74,7 @@ export const SPECIALISED_TYPES = [
   'math',
   'set',
   'replace',
+  'redact',
   'drop_document',
   'uppercase',
   'lowercase',
@@ -227,6 +230,15 @@ const defaultReplaceProcessorFormState = (): ReplaceFormState => ({
   where: ALWAYS_CONDITION,
 });
 
+const defaultRedactProcessorFormState = (sampleDocs: FlattenRecord[]): RedactFormState => ({
+  action: 'redact' as const,
+  from: getDefaultTextField(sampleDocs, PRIORITIZED_CONTENT_FIELDS),
+  patterns: [{ value: '' }], // Start with one empty pattern field (required validation will catch if not filled)
+  ignore_missing: true,
+  ignore_failure: true,
+  where: ALWAYS_CONDITION,
+});
+
 const defaultUppercaseProcessorFormState = (): UppercaseFormState => ({
   action: 'uppercase' as const,
   from: '',
@@ -298,6 +310,7 @@ const defaultProcessorFormStateByType: Record<
   manual_ingest_pipeline: defaultManualIngestPipelineProcessorFormState,
   math: defaultMathProcessorFormState,
   replace: defaultReplaceProcessorFormState,
+  redact: defaultRedactProcessorFormState,
   uppercase: defaultUppercaseProcessorFormState,
   lowercase: defaultLowercaseProcessorFormState,
   trim: defaultTrimProcessorFormState,
@@ -329,6 +342,15 @@ export const getFormStateFromActionStep = (
     }) as GrokFormState;
   }
 
+  if (step.action === 'redact') {
+    const { customIdentifier, parentId, patterns, ...restStep } = step;
+    // Convert string[] patterns to RedactPatternWrapper[] for useFieldArray compatibility
+    return {
+      ...structuredClone(restStep),
+      patterns: patterns.map((pattern) => ({ value: pattern })),
+    };
+  }
+
   if (
     step.action === 'dissect' ||
     step.action === 'manual_ingest_pipeline' ||
@@ -354,6 +376,7 @@ export const getFormStateFromActionStep = (
     const { customIdentifier, parentId, ...restStep } = step;
     return configDrivenProcessors[
       step.action as ConfigDrivenProcessorType
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ].convertProcessorToFormState(restStep as any);
   }
 
@@ -529,6 +552,38 @@ export const convertFormStateToProcessor = (
       };
     }
 
+    if (formState.action === 'redact') {
+      const {
+        from,
+        patterns,
+        pattern_definitions,
+        prefix,
+        suffix,
+        ignore_failure,
+        ignore_missing,
+      } = formState;
+
+      // Convert RedactPatternWrapper[] back to string[] and filter empty values
+      const patternsArray = Array.isArray(patterns)
+        ? patterns.map((p) => p.value).filter((p) => !isEmpty(p))
+        : [];
+
+      return {
+        processorDefinition: {
+          action: 'redact',
+          from,
+          patterns: patternsArray,
+          pattern_definitions: isEmpty(pattern_definitions) ? undefined : pattern_definitions,
+          prefix: isEmpty(prefix) ? undefined : prefix,
+          suffix: isEmpty(suffix) ? undefined : suffix,
+          ignore_failure,
+          ignore_missing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as RedactProcessor,
+      };
+    }
+
     if (formState.action === 'math') {
       const { expression, to, ignore_failure, ignore_missing } = formState;
 
@@ -625,6 +680,7 @@ export const convertFormStateToProcessor = (
     if (configDrivenProcessors[formState.action]) {
       return {
         processorDefinition: {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           ...configDrivenProcessors[formState.action].convertFormStateToConfig(formState as any),
           description,
         },
@@ -724,13 +780,9 @@ export const getValidSteps = (
         return false;
       }
 
-      // Valid but has no children (compilation of this step would be pointless)
-      const hasChildren = steps.some((s) => s.parentId === step.customIdentifier);
-      if (!hasChildren) {
-        return false;
-      }
-
-      // Valid where block with children
+      // Valid where block.
+      // Note: even if it has no children, we still allow it to participate in simulation.
+      // The server injects a simulation-only noop processor for each condition so we can track match rates.
       validSteps.push(step);
       return true;
     } else {

@@ -1222,6 +1222,15 @@ paths:
       summary: Get A2A agent card
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/agent_builder/a2a/{agentId}.json" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/agent_builder/a2a/{agentId}.json
       x-state: Technical Preview; added in 9.2.0
       x-metaTags:
         - content: Kibana
@@ -1279,6 +1288,15 @@ paths:
       summary: List agents
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+             -X GET "${KIBANA_URL}/api/agent_builder/agents" \
+             -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/agent_builder/agents
       x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
@@ -1357,6 +1375,12 @@ paths:
                         required:
                           - tool_ids
                       type: array
+                    workflow_ids:
+                      items:
+                        description: Optional list of workflow IDs. When set, these workflows run before every agent execution, in order.
+                        type: string
+                      maxItems: 100
+                      type: array
                   required:
                     - tools
                 description:
@@ -1408,6 +1432,59 @@ paths:
       summary: Create an agent
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/agent_builder/agents" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "id": "new-agent-id",
+                "name": "Search Index Helper",
+                "description": "Hi! I can help you search the data within the indices starting with \"content-\" prefix.",
+                "labels": ["custom-indices", "department-search"],
+                "avatar_color": "#BFDBFF",
+                "avatar_symbol": "SI",
+                "configuration": {
+                  "instructions": "You are a custom agent that wants to help searching data using all indices starting with prefix \"content-\".",
+                  "tools": [
+                    {
+                      "tool_ids": [
+                        "platform.core.search",
+                        "platform.core.list_indices",
+                        "platform.core.get_index_mapping",
+                        "platform.core.get_document_by_id"
+                      ]
+                    }
+                  ]
+                }
+            }'
+        - lang: Console
+          source: |
+            POST kbn://api/agent_builder/agents
+            {
+              "id": "new-agent-id",
+              "name": "Search Index Helper",
+              "description": "Hi! I can help you search the data within the indices starting with \"content-\" prefix.",
+              "labels": ["custom-indices", "department-search"],
+              "avatar_color": "#BFDBFF",
+              "avatar_symbol": "SI",
+              "configuration": {
+                "instructions": "You are a custom agent that wants to help searching data using all indices starting with prefix \"content-\".",
+                "tools": [
+                  {
+                    "tool_ids": [
+                      "platform.core.search",
+                      "platform.core.list_indices",
+                      "platform.core.get_index_mapping",
+                      "platform.core.get_document_by_id"
+                    ]
+                  }
+                ]
+              }
+            }
       x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
@@ -1450,6 +1527,16 @@ paths:
       summary: Delete an agent
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X DELETE "${KIBANA_URL}/api/agent_builder/agents/{id}" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true"
+        - lang: Console
+          source: |
+            DELETE kbn://api/agent_builder/agents/{id}
       x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
@@ -1500,6 +1587,15 @@ paths:
       summary: Get an agent by ID
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/agent_builder/agents/{id}" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/agent_builder/agents/{id}
       x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
@@ -1585,6 +1681,12 @@ paths:
                         required:
                           - tool_ids
                       type: array
+                    workflow_ids:
+                      items:
+                        description: Updated list of workflow IDs. When set, these workflows run every agent execution, in order.
+                        type: string
+                      maxItems: 100
+                      type: array
                 description:
                   description: Updated description of what the agent does.
                   type: string
@@ -1627,6 +1729,53 @@ paths:
       summary: Update an agent
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X PUT "${KIBANA_URL}/api/agent_builder/agents/{id}" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "name": "Search Index Helper",
+                "description": "Updated description - Search for anything in \"content-*\" indices!",
+                "labels": ["custom-indices", "department-search", "elastic-employees"],
+                "avatar_color": "#BFDBFF",
+                "avatar_symbol": "SI",
+                "configuration": {
+                  "instructions": "You are a custom agent that wants to help searching data using all indices starting with prefix \"content-\".",
+                  "tools": [{
+                    "tool_ids": [
+                      "platform.core.search",
+                      "platform.core.list_indices",
+                      "platform.core.get_index_mapping",
+                      "platform.core.get_document_by_id"
+                    ]
+                  }]
+                }
+              }'
+        - lang: Console
+          source: |
+            PUT kbn://api/agent_builder/agents/{id}
+            {
+              "name": "Search Index Helper",
+              "description": "Updated description - Search for anything in \"content-*\" indices!",
+              "labels": ["custom-indices", "department-search", "elastic-employees"],
+              "avatar_color": "#BFDBFF",
+              "avatar_symbol": "SI",
+              "configuration": {
+                "instructions": "You are a custom agent that wants to help searching data using all indices starting with prefix \"content-\".",
+                "tools": [{
+                  "tool_ids": [
+                    "platform.core.search",
+                    "platform.core.list_indices",
+                    "platform.core.get_index_mapping",
+                    "platform.core.get_document_by_id"
+                  ]
+                }]
+              }
+            }
       x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
@@ -1669,6 +1818,15 @@ paths:
       summary: List conversations
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/agent_builder/conversations" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/agent_builder/conversations
       x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
@@ -1711,6 +1869,16 @@ paths:
       summary: Delete conversation by ID
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X DELETE "${KIBANA_URL}/api/agent_builder/conversations/{conversation_id}" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true"
+        - lang: Console
+          source: |
+            DELETE kbn://api/agent_builder/conversations/{conversation_id}
       x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
@@ -1761,6 +1929,15 @@ paths:
       summary: Get conversation by ID
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/agent_builder/conversations/{conversation_id}" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/agent_builder/conversations/{conversation_id}
       x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
@@ -1904,12 +2081,14 @@ paths:
                 id:
                   description: Optional custom ID for the attachment.
                   type: string
+                origin: {}
                 type:
-                  description: The type of the attachment (e.g., text, json, visualization_ref).
+                  description: The type of the attachment (e.g., text, esql, visualization).
                   type: string
               required:
                 - type
                 - data
+                - origin
       responses:
         '200':
           content:
@@ -2254,6 +2433,17 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                _execution_mode:
+                  description: '**Experimental; added in 9.4.0.** define how to execute the agent (local execution or via task_manager)'
+                  enum:
+                    - local
+                    - task_manager
+                  type: string
+                action:
+                  description: The action to perform. "regenerate" re-executes the last round with the original input. Requires conversation_id.
+                  enum:
+                    - regenerate
+                  type: string
                 agent_id:
                   default: elastic-ai-agent
                   description: The ID of the agent to chat with. Defaults to the default Elastic AI agent.
@@ -2377,6 +2567,24 @@ paths:
       summary: Send chat message
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/agent_builder/converse" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "input": "What is Elasticsearch?",
+                "agent_id": "elastic-ai-agent"}'
+        - lang: Console
+          source: |
+            POST kbn://api/agent_builder/converse
+            {
+              "input": "What is Elasticsearch?",
+              "agent_id": "elastic-ai-agent"
+            }
       x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
@@ -2592,6 +2800,17 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                _execution_mode:
+                  description: '**Experimental; added in 9.4.0.** define how to execute the agent (local execution or via task_manager)'
+                  enum:
+                    - local
+                    - task_manager
+                  type: string
+                action:
+                  description: The action to perform. "regenerate" re-executes the last round with the original input. Requires conversation_id.
+                  enum:
+                    - regenerate
+                  type: string
                 agent_id:
                   default: elastic-ai-agent
                   description: The ID of the agent to chat with. Defaults to the default Elastic AI agent.
@@ -2730,6 +2949,27 @@ paths:
       summary: Send chat message (streaming)
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/agent_builder/converse/async" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "input": "Hello again let us have an async chat",
+                "agent_id": "elastic-ai-agent",
+                "conversation_id": "<CONVERSATION_ID>"
+              }'
+        - lang: Console
+          source: |
+            POST kbn://api/agent_builder/converse/async
+            {
+              "input": "Hello again let's have an async chat",
+              "agent_id": "elastic-ai-agent",
+              "conversation_id": "<CONVERSATION_ID>"
+            }
       x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
@@ -3278,7 +3518,7 @@ paths:
                               - KO
                               - buy
                         tool_result_id: xTpT
-                        type: tabular_data
+                        type: esql_results
                 executeBuiltinToolExample:
                   description: Example response calling built-in platform.core.get_document_by_id tool
                   value:
@@ -3327,7 +3567,7 @@ paths:
                               - 89.93244177666526
                               - INTL_CORP_EU_B
                         tool_result_id: Voy8
-                        type: tabular_data
+                        type: esql_results
                 executeIndexSearchToolExample:
                   description: Example response calling custom example-index-search-tool tool
                   value:
@@ -3372,7 +3612,7 @@ paths:
                               - JAP_JGB_10YR
                               - sell
                         tool_result_id: uE8y
-                        type: tabular_data
+                        type: esql_results
           description: Indicates a successful response
       summary: Run a tool
       tags:
@@ -12296,7 +12536,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Delete cases
       tags:
@@ -12353,7 +12593,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Update cases
       tags:
@@ -12396,7 +12636,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Create a case
       tags:
@@ -12464,7 +12704,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Search cases
       tags:
@@ -12502,7 +12742,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Get case information
       tags:
@@ -12539,7 +12779,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Get all alerts for a case
       tags:
@@ -12569,7 +12809,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Delete all case comments and alerts
       tags:
@@ -12613,7 +12853,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Update a case comment or alert
       tags:
@@ -12657,7 +12897,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Add a case comment or alert
       tags:
@@ -12692,7 +12932,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Find case comments and alerts
       tags:
@@ -12722,7 +12962,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Delete a case comment or alert
       tags:
@@ -12759,7 +12999,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Get a case comment or alert
       tags:
@@ -12802,7 +13042,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Push a case to an external service
       tags:
@@ -12846,7 +13086,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Attach a file to a case
       tags:
@@ -12897,7 +13137,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Find case activity
       tags:
@@ -12943,7 +13183,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Get cases for an alert
       tags:
@@ -13116,7 +13356,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Get case settings
       tags:
@@ -13293,7 +13533,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Add case settings
       tags:
@@ -13472,7 +13712,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Update case settings
       tags:
@@ -13531,7 +13771,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Get case connectors
       tags:
@@ -13583,7 +13823,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Get case creators
       tags:
@@ -13621,7 +13861,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Get case tags
       tags:
@@ -23629,6 +23869,31 @@ paths:
                       additionalProperties: false
                       type: object
                       properties:
+                        auth:
+                          additionalProperties: false
+                          nullable: true
+                          type: object
+                          properties:
+                            api_key:
+                              type: string
+                            headers:
+                              items:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  key:
+                                    type: string
+                                  value:
+                                    type: string
+                                required:
+                                  - key
+                                  - value
+                              maxItems: 100
+                              type: array
+                            password:
+                              type: string
+                            username:
+                              type: string
                         host:
                           format: uri
                           type: string
@@ -23647,6 +23912,30 @@ paths:
                           additionalProperties: false
                           type: object
                           properties:
+                            auth:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                api_key:
+                                  anyOf:
+                                    - additionalProperties: false
+                                      type: object
+                                      properties:
+                                        id:
+                                          type: string
+                                      required:
+                                        - id
+                                    - type: string
+                                password:
+                                  anyOf:
+                                    - additionalProperties: false
+                                      type: object
+                                      properties:
+                                        id:
+                                          type: string
+                                      required:
+                                        - id
+                                    - type: string
                             ssl:
                               additionalProperties: false
                               type: object
@@ -23744,6 +24033,31 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                auth:
+                  additionalProperties: false
+                  nullable: true
+                  type: object
+                  properties:
+                    api_key:
+                      type: string
+                    headers:
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          key:
+                            type: string
+                          value:
+                            type: string
+                        required:
+                          - key
+                          - value
+                      maxItems: 100
+                      type: array
+                    password:
+                      type: string
+                    username:
+                      type: string
                 host:
                   format: uri
                   type: string
@@ -23762,6 +24076,30 @@ paths:
                   additionalProperties: false
                   type: object
                   properties:
+                    auth:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        api_key:
+                          anyOf:
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                              required:
+                                - id
+                            - type: string
+                        password:
+                          anyOf:
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                              required:
+                                - id
+                            - type: string
                     ssl:
                       additionalProperties: false
                       type: object
@@ -23804,6 +24142,31 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
+                      auth:
+                        additionalProperties: false
+                        nullable: true
+                        type: object
+                        properties:
+                          api_key:
+                            type: string
+                          headers:
+                            items:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                key:
+                                  type: string
+                                value:
+                                  type: string
+                              required:
+                                - key
+                                - value
+                            maxItems: 100
+                            type: array
+                          password:
+                            type: string
+                          username:
+                            type: string
                       host:
                         format: uri
                         type: string
@@ -23822,6 +24185,30 @@ paths:
                         additionalProperties: false
                         type: object
                         properties:
+                          auth:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              api_key:
+                                anyOf:
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                    required:
+                                      - id
+                                  - type: string
+                              password:
+                                anyOf:
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                    required:
+                                      - id
+                                  - type: string
                           ssl:
                             additionalProperties: false
                             type: object
@@ -23975,6 +24362,31 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
+                      auth:
+                        additionalProperties: false
+                        nullable: true
+                        type: object
+                        properties:
+                          api_key:
+                            type: string
+                          headers:
+                            items:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                key:
+                                  type: string
+                                value:
+                                  type: string
+                              required:
+                                - key
+                                - value
+                            maxItems: 100
+                            type: array
+                          password:
+                            type: string
+                          username:
+                            type: string
                       host:
                         format: uri
                         type: string
@@ -23993,6 +24405,30 @@ paths:
                         additionalProperties: false
                         type: object
                         properties:
+                          auth:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              api_key:
+                                anyOf:
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                    required:
+                                      - id
+                                  - type: string
+                              password:
+                                anyOf:
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                    required:
+                                      - id
+                                  - type: string
                           ssl:
                             additionalProperties: false
                             type: object
@@ -24084,6 +24520,31 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                auth:
+                  additionalProperties: false
+                  nullable: true
+                  type: object
+                  properties:
+                    api_key:
+                      type: string
+                    headers:
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          key:
+                            type: string
+                          value:
+                            type: string
+                        required:
+                          - key
+                          - value
+                      maxItems: 100
+                      type: array
+                    password:
+                      type: string
+                    username:
+                      type: string
                 host:
                   format: uri
                   type: string
@@ -24102,6 +24563,30 @@ paths:
                   additionalProperties: false
                   type: object
                   properties:
+                    auth:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        api_key:
+                          anyOf:
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                              required:
+                                - id
+                            - type: string
+                        password:
+                          anyOf:
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                              required:
+                                - id
+                            - type: string
                     ssl:
                       additionalProperties: false
                       type: object
@@ -24144,6 +24629,31 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
+                      auth:
+                        additionalProperties: false
+                        nullable: true
+                        type: object
+                        properties:
+                          api_key:
+                            type: string
+                          headers:
+                            items:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                key:
+                                  type: string
+                                value:
+                                  type: string
+                              required:
+                                - key
+                                - value
+                            maxItems: 100
+                            type: array
+                          password:
+                            type: string
+                          username:
+                            type: string
                       host:
                         format: uri
                         type: string
@@ -24162,6 +24672,30 @@ paths:
                         additionalProperties: false
                         type: object
                         properties:
+                          auth:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              api_key:
+                                anyOf:
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                    required:
+                                      - id
+                                  - type: string
+                              password:
+                                anyOf:
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                    required:
+                                      - id
+                                  - type: string
                           ssl:
                             additionalProperties: false
                             type: object
@@ -29599,6 +30133,30 @@ paths:
                                 additionalProperties: false
                                 type: object
                                 properties:
+                                  auth:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      api_key:
+                                        type: string
+                                      headers:
+                                        items:
+                                          additionalProperties: false
+                                          type: object
+                                          properties:
+                                            key:
+                                              type: string
+                                            value:
+                                              type: string
+                                          required:
+                                            - key
+                                            - value
+                                        maxItems: 100
+                                        type: array
+                                      password:
+                                        type: string
+                                      username:
+                                        type: string
                                   proxy_headers:
                                     additionalProperties:
                                       anyOf:
@@ -31858,6 +32416,8 @@ paths:
                           properties:
                             id:
                               type: string
+                            type:
+                              type: string
                             version:
                               type: string
                           required:
@@ -31865,6 +32425,11 @@ paths:
                             - version
                         audit_unenrolled_reason:
                           type: string
+                        capabilities:
+                          items:
+                            type: string
+                          maxItems: 100
+                          type: array
                         components:
                           items:
                             additionalProperties: false
@@ -31947,10 +32512,18 @@ paths:
                           type: array
                         default_api_key_id:
                           type: string
+                        effective_config: {}
                         enrolled_at:
                           type: string
+                        health:
+                          additionalProperties: {}
+                          type: object
                         id:
                           type: string
+                        identifying_attributes:
+                          additionalProperties:
+                            type: string
+                          type: object
                         last_checkin:
                           type: string
                         last_checkin_message:
@@ -31993,6 +32566,10 @@ paths:
                             type: string
                           maxItems: 100
                           type: array
+                        non_identifying_attributes:
+                          additionalProperties:
+                            type: string
+                          type: object
                         outputs:
                           additionalProperties:
                             additionalProperties: false
@@ -32027,6 +32604,8 @@ paths:
                         policy_revision:
                           nullable: true
                           type: number
+                        sequence_num:
+                          type: number
                         sort:
                           items: {}
                           maxItems: 10
@@ -32055,6 +32634,7 @@ paths:
                             - PERMANENT
                             - EPHEMERAL
                             - TEMPORARY
+                            - OPAMP
                           type: string
                         unenrolled_at:
                           type: string
@@ -32123,6 +32703,8 @@ paths:
                                     - UPG_WATCHING
                                     - UPG_ROLLBACK
                                   type: string
+                                reason:
+                                  type: string
                                 retry_error_msg:
                                   type: string
                                 retry_until:
@@ -32163,6 +32745,7 @@ paths:
                         - active
                         - enrolled_at
                         - local_metadata
+                        - effective_config
                     maxItems: 10000
                     type: array
                   nextSearchAfter:
@@ -32399,6 +32982,8 @@ paths:
                         properties:
                           id:
                             type: string
+                          type:
+                            type: string
                           version:
                             type: string
                         required:
@@ -32406,6 +32991,11 @@ paths:
                           - version
                       audit_unenrolled_reason:
                         type: string
+                      capabilities:
+                        items:
+                          type: string
+                        maxItems: 100
+                        type: array
                       components:
                         items:
                           additionalProperties: false
@@ -32488,10 +33078,18 @@ paths:
                         type: array
                       default_api_key_id:
                         type: string
+                      effective_config: {}
                       enrolled_at:
                         type: string
+                      health:
+                        additionalProperties: {}
+                        type: object
                       id:
                         type: string
+                      identifying_attributes:
+                        additionalProperties:
+                          type: string
+                        type: object
                       last_checkin:
                         type: string
                       last_checkin_message:
@@ -32534,6 +33132,10 @@ paths:
                           type: string
                         maxItems: 100
                         type: array
+                      non_identifying_attributes:
+                        additionalProperties:
+                          type: string
+                        type: object
                       outputs:
                         additionalProperties:
                           additionalProperties: false
@@ -32568,6 +33170,8 @@ paths:
                       policy_revision:
                         nullable: true
                         type: number
+                      sequence_num:
+                        type: number
                       sort:
                         items: {}
                         maxItems: 10
@@ -32596,6 +33200,7 @@ paths:
                           - PERMANENT
                           - EPHEMERAL
                           - TEMPORARY
+                          - OPAMP
                         type: string
                       unenrolled_at:
                         type: string
@@ -32664,6 +33269,8 @@ paths:
                                   - UPG_WATCHING
                                   - UPG_ROLLBACK
                                 type: string
+                              reason:
+                                type: string
                               retry_error_msg:
                                 type: string
                               retry_until:
@@ -32704,6 +33311,7 @@ paths:
                       - active
                       - enrolled_at
                       - local_metadata
+                      - effective_config
                 required:
                   - item
           description: 'OK: A successful request.'
@@ -32796,6 +33404,8 @@ paths:
                         properties:
                           id:
                             type: string
+                          type:
+                            type: string
                           version:
                             type: string
                         required:
@@ -32803,6 +33413,11 @@ paths:
                           - version
                       audit_unenrolled_reason:
                         type: string
+                      capabilities:
+                        items:
+                          type: string
+                        maxItems: 100
+                        type: array
                       components:
                         items:
                           additionalProperties: false
@@ -32885,10 +33500,18 @@ paths:
                         type: array
                       default_api_key_id:
                         type: string
+                      effective_config: {}
                       enrolled_at:
                         type: string
+                      health:
+                        additionalProperties: {}
+                        type: object
                       id:
                         type: string
+                      identifying_attributes:
+                        additionalProperties:
+                          type: string
+                        type: object
                       last_checkin:
                         type: string
                       last_checkin_message:
@@ -32931,6 +33554,10 @@ paths:
                           type: string
                         maxItems: 100
                         type: array
+                      non_identifying_attributes:
+                        additionalProperties:
+                          type: string
+                        type: object
                       outputs:
                         additionalProperties:
                           additionalProperties: false
@@ -32965,6 +33592,8 @@ paths:
                       policy_revision:
                         nullable: true
                         type: number
+                      sequence_num:
+                        type: number
                       sort:
                         items: {}
                         maxItems: 10
@@ -32993,6 +33622,7 @@ paths:
                           - PERMANENT
                           - EPHEMERAL
                           - TEMPORARY
+                          - OPAMP
                         type: string
                       unenrolled_at:
                         type: string
@@ -33061,6 +33691,8 @@ paths:
                                   - UPG_WATCHING
                                   - UPG_ROLLBACK
                                 type: string
+                              reason:
+                                type: string
                               retry_error_msg:
                                 type: string
                               retry_until:
@@ -33101,6 +33733,7 @@ paths:
                       - active
                       - enrolled_at
                       - local_metadata
+                      - effective_config
                 required:
                   - item
           description: 'OK: A successful request.'
@@ -33282,6 +33915,71 @@ paths:
       summary: Create an agent action
       tags:
         - Elastic Agent actions
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/fleet/agents/{agentId}/effective_config:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agents/{agentId}/effective_config</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Get an agent's effective config by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agents-read.
+      operationId: get-fleet-agents-agentid-effective-config
+      parameters:
+        - description: The agent ID to get effective config of
+          in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                successResponse:
+                  value:
+                    effective_config: {}
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  effective_config: {}
+                required:
+                  - effective_config
+          description: 'OK: A successful request.'
+        '400':
+          content:
+            application/json:
+              examples:
+                badRequestResponse:
+                  value:
+                    message: Bad Request
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: A bad request.
+      summary: Get an agent's effective config
+      tags:
+        - Elastic Agents
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -37252,6 +37950,21 @@ paths:
                           additionalProperties: true
                           type: object
                           properties:
+                            deprecated:
+                              additionalProperties: true
+                              type: object
+                              properties:
+                                description:
+                                  type: string
+                                replaced_by:
+                                  additionalProperties:
+                                    type: string
+                                  type: object
+                                since:
+                                  type: string
+                              required:
+                                - description
+                                - since
                             elastic:
                               additionalProperties: true
                               type: object
@@ -37275,6 +37988,21 @@ paths:
                             type: object
                           maxItems: 1000
                           type: array
+                        deprecated:
+                          additionalProperties: true
+                          type: object
+                          properties:
+                            description:
+                              type: string
+                            replaced_by:
+                              additionalProperties:
+                                type: string
+                              type: object
+                            since:
+                              type: string
+                          required:
+                            - description
+                            - since
                         description:
                           type: string
                         discovery:
@@ -38814,6 +39542,21 @@ paths:
                         additionalProperties: true
                         type: object
                         properties:
+                          deprecated:
+                            additionalProperties: true
+                            type: object
+                            properties:
+                              description:
+                                type: string
+                              replaced_by:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                              since:
+                                type: string
+                            required:
+                              - description
+                              - since
                           elastic:
                             additionalProperties: true
                             type: object
@@ -38837,6 +39580,21 @@ paths:
                           type: object
                         maxItems: 1000
                         type: array
+                      deprecated:
+                        additionalProperties: true
+                        type: object
+                        properties:
+                          description:
+                            type: string
+                          replaced_by:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          since:
+                            type: string
+                        required:
+                          - description
+                          - since
                       description:
                         type: string
                       discovery:
@@ -39571,6 +40329,21 @@ paths:
                         additionalProperties: true
                         type: object
                         properties:
+                          deprecated:
+                            additionalProperties: true
+                            type: object
+                            properties:
+                              description:
+                                type: string
+                              replaced_by:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                              since:
+                                type: string
+                            required:
+                              - description
+                              - since
                           elastic:
                             additionalProperties: true
                             type: object
@@ -39594,6 +40367,21 @@ paths:
                           type: object
                         maxItems: 1000
                         type: array
+                      deprecated:
+                        additionalProperties: true
+                        type: object
+                        properties:
+                          description:
+                            type: string
+                          replaced_by:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          since:
+                            type: string
+                        required:
+                          - description
+                          - since
                       description:
                         type: string
                       discovery:
@@ -53017,6 +53805,8 @@ paths:
                         required:
                           - enabled
                           - is_preconfigured
+                      download_source_auth_secret_storage_requirements_met:
+                        type: boolean
                       has_seen_add_data_notice:
                         type: boolean
                       id:
@@ -53191,6 +53981,8 @@ paths:
                         required:
                           - enabled
                           - is_preconfigured
+                      download_source_auth_secret_storage_requirements_met:
+                        type: boolean
                       has_seen_add_data_notice:
                         type: boolean
                       id:
@@ -58535,6 +59327,7 @@ paths:
         Create multiple Kibana saved objects.
 
         WARNING: This API is intended to be removed in a future Elastic stack version. Consider using the import API for your use case.
+        NOTE: For forward compatibility, include `coreMigrationVersion` and `typeMigrationVersion` when creating saved objects outside of Kibana or when persisting raw saved objects outside of Kibana.
       operationId: bulkCreateSavedObjects
       parameters:
         - $ref: '#/components/parameters/Saved_objects_kbn_xsrf'
@@ -58549,6 +59342,15 @@ paths:
             schema:
               items:
                 type: object
+                properties:
+                  coreMigrationVersion:
+                    description: |
+                      The Kibana version that last migrated this document. When creating saved objects outside of Kibana, preserve this field to retain forward compatibility.
+                    type: string
+                  typeMigrationVersion:
+                    description: |
+                      The type version that last migrated this document. When creating saved objects outside of Kibana, preserve this field to retain forward compatibility.
+                    type: string
               type: array
         required: true
       responses:
@@ -58763,6 +59565,8 @@ paths:
         Retrieve sets of saved objects that you want to import into Kibana. You must include `type` or `objects` in the request body. The output of exporting saved objects must be treated as opaque. Tampering with exported data risks introducing unspecified errors and data loss.
 
         Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.
+
+        NOTE: The exported saved objects include `coreMigrationVersion` and `typeMigrationVersion` metadata. If you store exported saved objects outside of Kibana (for example in NDJSON files) or generate them yourself, you must preserve or include these fields to retain forward compatibility across Kibana versions.
 
         NOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be exported.
       operationId: post-saved-objects-export
@@ -59034,6 +59838,8 @@ paths:
         Create sets of Kibana saved objects from a file created by the export API. Saved objects can only be imported into the same version, a newer minor on the same major, or the next major. Tampering with exported data risks introducing unspecified errors and data loss.
 
         Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.
+
+        NOTE: The exported saved objects include `coreMigrationVersion` and `typeMigrationVersion` metadata. If you store exported saved objects outside of Kibana (for example in NDJSON files) or generate them yourself, you must preserve or include these fields to retain forwards compatibility across Kibana versions.
       operationId: post-saved-objects-import
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -59312,6 +60118,7 @@ paths:
         Create a Kibana saved object with a randomly generated identifier.
 
         WARNING: This API is intended to be removed in a future Elastic stack version. Consider using the import API for your use case.
+        NOTE: For forward compatibility, include `coreMigrationVersion` and `typeMigrationVersion` when creating saved objects outside of Kibana or when persisting raw saved objects outside of Kibana.
       operationId: createSavedObject
       parameters:
         - $ref: '#/components/parameters/Saved_objects_kbn_xsrf'
@@ -59329,10 +60136,18 @@ paths:
               properties:
                 attributes:
                   $ref: '#/components/schemas/Saved_objects_attributes'
+                coreMigrationVersion:
+                  description: |
+                    The Kibana version that last migrated this document. When creating saved objects outside of Kibana, preserve this field to retain forward compatibility.
+                  type: string
                 initialNamespaces:
                   $ref: '#/components/schemas/Saved_objects_initial_namespaces'
                 references:
                   $ref: '#/components/schemas/Saved_objects_references'
+                typeMigrationVersion:
+                  description: |
+                    The type version that last migrated this document. When creating saved objects outside of Kibana, preserve this field to retain forward compatibility.
+                  type: string
               required:
                 - attributes
         required: true
@@ -59403,6 +60218,7 @@ paths:
         Create a Kibana saved object and specify its identifier instead of using a randomly generated ID.
 
         WARNING: This API is intended to be removed in a future Elastic stack version. Consider using the import API for your use case.
+        NOTE: For forward compatibility, include `coreMigrationVersion` and `typeMigrationVersion` when creating saved objects outside of Kibana or when persisting raw saved objects outside of Kibana.
       operationId: createSavedObjectId
       parameters:
         - $ref: '#/components/parameters/Saved_objects_kbn_xsrf'
@@ -59421,10 +60237,18 @@ paths:
               properties:
                 attributes:
                   $ref: '#/components/schemas/Saved_objects_attributes'
+                coreMigrationVersion:
+                  description: |
+                    The Kibana version that last migrated this document. When creating saved objects outside of Kibana, preserve this field to retain forward compatibility.
+                  type: string
                 initialNamespaces:
                   $ref: '#/components/schemas/Saved_objects_initial_namespaces'
                 references:
-                  $ref: '#/components/schemas/Saved_objects_initial_namespaces'
+                  $ref: '#/components/schemas/Saved_objects_references'
+                typeMigrationVersion:
+                  description: |
+                    The type version that last migrated this document. When creating saved objects outside of Kibana, preserve this field to retain forward compatibility.
+                  type: string
               required:
                 - attributes
         required: true
@@ -65439,6 +66263,221 @@ paths:
                                                               - pattern
                                                               - replacement
                                                           - additionalProperties: false
+                                                            description: Redact processor - Mask sensitive data using Grok patterns
+                                                            type: object
+                                                            properties:
+                                                              action:
+                                                                enum:
+                                                                  - redact
+                                                                type: string
+                                                              customIdentifier:
+                                                                description: Custom identifier to correlate this processor across outputs
+                                                                minLength: 1
+                                                                type: string
+                                                              description:
+                                                                description: Human-readable notes about this processor step
+                                                                type: string
+                                                              from:
+                                                                description: Source field to redact sensitive data from
+                                                                minLength: 1
+                                                                type: string
+                                                              ignore_failure:
+                                                                description: Continue pipeline execution if this processor fails
+                                                                type: boolean
+                                                              ignore_missing:
+                                                                description: Skip processing when source field is missing (defaults to true)
+                                                                type: boolean
+                                                              pattern_definitions:
+                                                                additionalProperties:
+                                                                  type: string
+                                                                description: Custom pattern definitions to use in the patterns
+                                                                type: object
+                                                              patterns:
+                                                                description: Grok patterns to match sensitive data (for example, "%{IP:client}", "%{EMAILADDRESS:email}")
+                                                                items:
+                                                                  description: A non-empty string.
+                                                                  minLength: 1
+                                                                  type: string
+                                                                minItems: 1
+                                                                type: array
+                                                              prefix:
+                                                                description: Prefix to prepend to the redacted pattern name (defaults to "<")
+                                                                type: string
+                                                              suffix:
+                                                                description: Suffix to append to the redacted pattern name (defaults to ">")
+                                                                type: string
+                                                              where:
+                                                                anyOf:
+                                                                  - anyOf:
+                                                                      - additionalProperties: false
+                                                                        description: A condition that compares a field to a value or range using an operator as the key.
+                                                                        type: object
+                                                                        properties:
+                                                                          contains:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                            description: Contains comparison value.
+                                                                          endsWith:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                            description: Ends-with comparison value.
+                                                                          eq:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                            description: Equality comparison value.
+                                                                          field:
+                                                                            description: The document field to filter on.
+                                                                            minLength: 1
+                                                                            type: string
+                                                                          gt:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                            description: Greater-than comparison value.
+                                                                          gte:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                            description: Greater-than-or-equal comparison value.
+                                                                          includes:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                            description: Checks if multivalue field includes the value.
+                                                                          lt:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                            description: Less-than comparison value.
+                                                                          lte:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                            description: Less-than-or-equal comparison value.
+                                                                          neq:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                            description: Inequality comparison value.
+                                                                          range:
+                                                                            additionalProperties: false
+                                                                            description: Range comparison values.
+                                                                            type: object
+                                                                            properties:
+                                                                              gt:
+                                                                                anyOf:
+                                                                                  - type: string
+                                                                                  - type: number
+                                                                                  - type: boolean
+                                                                                description: A value that can be a string, number, or boolean.
+                                                                              gte:
+                                                                                anyOf:
+                                                                                  - type: string
+                                                                                  - type: number
+                                                                                  - type: boolean
+                                                                                description: A value that can be a string, number, or boolean.
+                                                                              lt:
+                                                                                anyOf:
+                                                                                  - type: string
+                                                                                  - type: number
+                                                                                  - type: boolean
+                                                                                description: A value that can be a string, number, or boolean.
+                                                                              lte:
+                                                                                anyOf:
+                                                                                  - type: string
+                                                                                  - type: number
+                                                                                  - type: boolean
+                                                                                description: A value that can be a string, number, or boolean.
+                                                                          startsWith:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                            description: Starts-with comparison value.
+                                                                        required:
+                                                                          - field
+                                                                      - additionalProperties: false
+                                                                        description: A condition that checks for the existence or non-existence of a field.
+                                                                        type: object
+                                                                        properties:
+                                                                          exists:
+                                                                            description: Indicates whether the field exists or not.
+                                                                            type: boolean
+                                                                          field:
+                                                                            description: The document field to check.
+                                                                            minLength: 1
+                                                                            type: string
+                                                                        required:
+                                                                          - field
+                                                                    description: A basic filter condition, either unary or binary.
+                                                                  - additionalProperties: false
+                                                                    description: A logical AND that groups multiple conditions.
+                                                                    type: object
+                                                                    properties:
+                                                                      and:
+                                                                        description: An array of conditions. All sub-conditions must be true for this condition to be true.
+                                                                        items: {}
+                                                                        type: array
+                                                                    required:
+                                                                      - and
+                                                                  - additionalProperties: false
+                                                                    description: A logical OR that groups multiple conditions.
+                                                                    type: object
+                                                                    properties:
+                                                                      or:
+                                                                        description: An array of conditions. At least one sub-condition must be true for this condition to be true.
+                                                                        items: {}
+                                                                        type: array
+                                                                    required:
+                                                                      - or
+                                                                  - additionalProperties: false
+                                                                    description: A logical NOT that negates a condition.
+                                                                    type: object
+                                                                    properties:
+                                                                      not:
+                                                                        description: A condition that negates another condition.
+                                                                    required:
+                                                                      - not
+                                                                  - additionalProperties: false
+                                                                    description: A condition that always evaluates to false.
+                                                                    type: object
+                                                                    properties:
+                                                                      never:
+                                                                        additionalProperties: false
+                                                                        description: An empty object. This condition never matches.
+                                                                        type: object
+                                                                        properties: {}
+                                                                    required:
+                                                                      - never
+                                                                  - additionalProperties: false
+                                                                    description: A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.
+                                                                    type: object
+                                                                    properties:
+                                                                      always:
+                                                                        additionalProperties: false
+                                                                        description: An empty object. This condition always matches.
+                                                                        type: object
+                                                                        properties: {}
+                                                                    required:
+                                                                      - always
+                                                                description: Conditional expression controlling whether this processor runs
+                                                            required:
+                                                              - action
+                                                              - from
+                                                              - patterns
+                                                          - additionalProperties: false
                                                             description: Base processor options plus conditional execution
                                                             type: object
                                                             properties:
@@ -67245,6 +68284,16 @@ paths:
                                                                   - boolean
                                                                   - ip
                                                                   - geo_point
+                                                                  - integer
+                                                                  - short
+                                                                  - byte
+                                                                  - float
+                                                                  - half_float
+                                                                  - text
+                                                                  - wildcard
+                                                                  - version
+                                                                  - unsigned_long
+                                                                  - date_nanos
                                                                 type: string
                                                             required:
                                                               - type
@@ -69929,6 +70978,221 @@ paths:
                                                           - from
                                                           - pattern
                                                           - replacement
+                                                      - additionalProperties: false
+                                                        description: Redact processor - Mask sensitive data using Grok patterns
+                                                        type: object
+                                                        properties:
+                                                          action:
+                                                            enum:
+                                                              - redact
+                                                            type: string
+                                                          customIdentifier:
+                                                            description: Custom identifier to correlate this processor across outputs
+                                                            minLength: 1
+                                                            type: string
+                                                          description:
+                                                            description: Human-readable notes about this processor step
+                                                            type: string
+                                                          from:
+                                                            description: Source field to redact sensitive data from
+                                                            minLength: 1
+                                                            type: string
+                                                          ignore_failure:
+                                                            description: Continue pipeline execution if this processor fails
+                                                            type: boolean
+                                                          ignore_missing:
+                                                            description: Skip processing when source field is missing (defaults to true)
+                                                            type: boolean
+                                                          pattern_definitions:
+                                                            additionalProperties:
+                                                              type: string
+                                                            description: Custom pattern definitions to use in the patterns
+                                                            type: object
+                                                          patterns:
+                                                            description: Grok patterns to match sensitive data (for example, "%{IP:client}", "%{EMAILADDRESS:email}")
+                                                            items:
+                                                              description: A non-empty string.
+                                                              minLength: 1
+                                                              type: string
+                                                            minItems: 1
+                                                            type: array
+                                                          prefix:
+                                                            description: Prefix to prepend to the redacted pattern name (defaults to "<")
+                                                            type: string
+                                                          suffix:
+                                                            description: Suffix to append to the redacted pattern name (defaults to ">")
+                                                            type: string
+                                                          where:
+                                                            anyOf:
+                                                              - anyOf:
+                                                                  - additionalProperties: false
+                                                                    description: A condition that compares a field to a value or range using an operator as the key.
+                                                                    type: object
+                                                                    properties:
+                                                                      contains:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                        description: Contains comparison value.
+                                                                      endsWith:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                        description: Ends-with comparison value.
+                                                                      eq:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                        description: Equality comparison value.
+                                                                      field:
+                                                                        description: The document field to filter on.
+                                                                        minLength: 1
+                                                                        type: string
+                                                                      gt:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                        description: Greater-than comparison value.
+                                                                      gte:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                        description: Greater-than-or-equal comparison value.
+                                                                      includes:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                        description: Checks if multivalue field includes the value.
+                                                                      lt:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                        description: Less-than comparison value.
+                                                                      lte:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                        description: Less-than-or-equal comparison value.
+                                                                      neq:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                        description: Inequality comparison value.
+                                                                      range:
+                                                                        additionalProperties: false
+                                                                        description: Range comparison values.
+                                                                        type: object
+                                                                        properties:
+                                                                          gt:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                            description: A value that can be a string, number, or boolean.
+                                                                          gte:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                            description: A value that can be a string, number, or boolean.
+                                                                          lt:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                            description: A value that can be a string, number, or boolean.
+                                                                          lte:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                            description: A value that can be a string, number, or boolean.
+                                                                      startsWith:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                        description: Starts-with comparison value.
+                                                                    required:
+                                                                      - field
+                                                                  - additionalProperties: false
+                                                                    description: A condition that checks for the existence or non-existence of a field.
+                                                                    type: object
+                                                                    properties:
+                                                                      exists:
+                                                                        description: Indicates whether the field exists or not.
+                                                                        type: boolean
+                                                                      field:
+                                                                        description: The document field to check.
+                                                                        minLength: 1
+                                                                        type: string
+                                                                    required:
+                                                                      - field
+                                                                description: A basic filter condition, either unary or binary.
+                                                              - additionalProperties: false
+                                                                description: A logical AND that groups multiple conditions.
+                                                                type: object
+                                                                properties:
+                                                                  and:
+                                                                    description: An array of conditions. All sub-conditions must be true for this condition to be true.
+                                                                    items: {}
+                                                                    type: array
+                                                                required:
+                                                                  - and
+                                                              - additionalProperties: false
+                                                                description: A logical OR that groups multiple conditions.
+                                                                type: object
+                                                                properties:
+                                                                  or:
+                                                                    description: An array of conditions. At least one sub-condition must be true for this condition to be true.
+                                                                    items: {}
+                                                                    type: array
+                                                                required:
+                                                                  - or
+                                                              - additionalProperties: false
+                                                                description: A logical NOT that negates a condition.
+                                                                type: object
+                                                                properties:
+                                                                  not:
+                                                                    description: A condition that negates another condition.
+                                                                required:
+                                                                  - not
+                                                              - additionalProperties: false
+                                                                description: A condition that always evaluates to false.
+                                                                type: object
+                                                                properties:
+                                                                  never:
+                                                                    additionalProperties: false
+                                                                    description: An empty object. This condition never matches.
+                                                                    type: object
+                                                                    properties: {}
+                                                                required:
+                                                                  - never
+                                                              - additionalProperties: false
+                                                                description: A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.
+                                                                type: object
+                                                                properties:
+                                                                  always:
+                                                                    additionalProperties: false
+                                                                    description: An empty object. This condition always matches.
+                                                                    type: object
+                                                                    properties: {}
+                                                                required:
+                                                                  - always
+                                                            description: Conditional expression controlling whether this processor runs
+                                                        required:
+                                                          - action
+                                                          - from
+                                                          - patterns
                                                       - additionalProperties: false
                                                         description: Base processor options plus conditional execution
                                                         type: object
@@ -74172,6 +75436,221 @@ paths:
                                                               - pattern
                                                               - replacement
                                                           - additionalProperties: false
+                                                            description: Redact processor - Mask sensitive data using Grok patterns
+                                                            type: object
+                                                            properties:
+                                                              action:
+                                                                enum:
+                                                                  - redact
+                                                                type: string
+                                                              customIdentifier:
+                                                                description: Custom identifier to correlate this processor across outputs
+                                                                minLength: 1
+                                                                type: string
+                                                              description:
+                                                                description: Human-readable notes about this processor step
+                                                                type: string
+                                                              from:
+                                                                description: Source field to redact sensitive data from
+                                                                minLength: 1
+                                                                type: string
+                                                              ignore_failure:
+                                                                description: Continue pipeline execution if this processor fails
+                                                                type: boolean
+                                                              ignore_missing:
+                                                                description: Skip processing when source field is missing (defaults to true)
+                                                                type: boolean
+                                                              pattern_definitions:
+                                                                additionalProperties:
+                                                                  type: string
+                                                                description: Custom pattern definitions to use in the patterns
+                                                                type: object
+                                                              patterns:
+                                                                description: Grok patterns to match sensitive data (for example, "%{IP:client}", "%{EMAILADDRESS:email}")
+                                                                items:
+                                                                  description: A non-empty string.
+                                                                  minLength: 1
+                                                                  type: string
+                                                                minItems: 1
+                                                                type: array
+                                                              prefix:
+                                                                description: Prefix to prepend to the redacted pattern name (defaults to "<")
+                                                                type: string
+                                                              suffix:
+                                                                description: Suffix to append to the redacted pattern name (defaults to ">")
+                                                                type: string
+                                                              where:
+                                                                anyOf:
+                                                                  - anyOf:
+                                                                      - additionalProperties: false
+                                                                        description: A condition that compares a field to a value or range using an operator as the key.
+                                                                        type: object
+                                                                        properties:
+                                                                          contains:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                            description: Contains comparison value.
+                                                                          endsWith:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                            description: Ends-with comparison value.
+                                                                          eq:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                            description: Equality comparison value.
+                                                                          field:
+                                                                            description: The document field to filter on.
+                                                                            minLength: 1
+                                                                            type: string
+                                                                          gt:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                            description: Greater-than comparison value.
+                                                                          gte:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                            description: Greater-than-or-equal comparison value.
+                                                                          includes:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                            description: Checks if multivalue field includes the value.
+                                                                          lt:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                            description: Less-than comparison value.
+                                                                          lte:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                            description: Less-than-or-equal comparison value.
+                                                                          neq:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                            description: Inequality comparison value.
+                                                                          range:
+                                                                            additionalProperties: false
+                                                                            description: Range comparison values.
+                                                                            type: object
+                                                                            properties:
+                                                                              gt:
+                                                                                anyOf:
+                                                                                  - type: string
+                                                                                  - type: number
+                                                                                  - type: boolean
+                                                                                description: A value that can be a string, number, or boolean.
+                                                                              gte:
+                                                                                anyOf:
+                                                                                  - type: string
+                                                                                  - type: number
+                                                                                  - type: boolean
+                                                                                description: A value that can be a string, number, or boolean.
+                                                                              lt:
+                                                                                anyOf:
+                                                                                  - type: string
+                                                                                  - type: number
+                                                                                  - type: boolean
+                                                                                description: A value that can be a string, number, or boolean.
+                                                                              lte:
+                                                                                anyOf:
+                                                                                  - type: string
+                                                                                  - type: number
+                                                                                  - type: boolean
+                                                                                description: A value that can be a string, number, or boolean.
+                                                                          startsWith:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                            description: Starts-with comparison value.
+                                                                        required:
+                                                                          - field
+                                                                      - additionalProperties: false
+                                                                        description: A condition that checks for the existence or non-existence of a field.
+                                                                        type: object
+                                                                        properties:
+                                                                          exists:
+                                                                            description: Indicates whether the field exists or not.
+                                                                            type: boolean
+                                                                          field:
+                                                                            description: The document field to check.
+                                                                            minLength: 1
+                                                                            type: string
+                                                                        required:
+                                                                          - field
+                                                                    description: A basic filter condition, either unary or binary.
+                                                                  - additionalProperties: false
+                                                                    description: A logical AND that groups multiple conditions.
+                                                                    type: object
+                                                                    properties:
+                                                                      and:
+                                                                        description: An array of conditions. All sub-conditions must be true for this condition to be true.
+                                                                        items: {}
+                                                                        type: array
+                                                                    required:
+                                                                      - and
+                                                                  - additionalProperties: false
+                                                                    description: A logical OR that groups multiple conditions.
+                                                                    type: object
+                                                                    properties:
+                                                                      or:
+                                                                        description: An array of conditions. At least one sub-condition must be true for this condition to be true.
+                                                                        items: {}
+                                                                        type: array
+                                                                    required:
+                                                                      - or
+                                                                  - additionalProperties: false
+                                                                    description: A logical NOT that negates a condition.
+                                                                    type: object
+                                                                    properties:
+                                                                      not:
+                                                                        description: A condition that negates another condition.
+                                                                    required:
+                                                                      - not
+                                                                  - additionalProperties: false
+                                                                    description: A condition that always evaluates to false.
+                                                                    type: object
+                                                                    properties:
+                                                                      never:
+                                                                        additionalProperties: false
+                                                                        description: An empty object. This condition never matches.
+                                                                        type: object
+                                                                        properties: {}
+                                                                    required:
+                                                                      - never
+                                                                  - additionalProperties: false
+                                                                    description: A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.
+                                                                    type: object
+                                                                    properties:
+                                                                      always:
+                                                                        additionalProperties: false
+                                                                        description: An empty object. This condition always matches.
+                                                                        type: object
+                                                                        properties: {}
+                                                                    required:
+                                                                      - always
+                                                                description: Conditional expression controlling whether this processor runs
+                                                            required:
+                                                              - action
+                                                              - from
+                                                              - patterns
+                                                          - additionalProperties: false
                                                             description: Base processor options plus conditional execution
                                                             type: object
                                                             properties:
@@ -75978,6 +77457,16 @@ paths:
                                                                   - boolean
                                                                   - ip
                                                                   - geo_point
+                                                                  - integer
+                                                                  - short
+                                                                  - byte
+                                                                  - float
+                                                                  - half_float
+                                                                  - text
+                                                                  - wildcard
+                                                                  - version
+                                                                  - unsigned_long
+                                                                  - date_nanos
                                                                 type: string
                                                             required:
                                                               - type
@@ -78474,6 +79963,221 @@ paths:
                                                           - from
                                                           - pattern
                                                           - replacement
+                                                      - additionalProperties: false
+                                                        description: Redact processor - Mask sensitive data using Grok patterns
+                                                        type: object
+                                                        properties:
+                                                          action:
+                                                            enum:
+                                                              - redact
+                                                            type: string
+                                                          customIdentifier:
+                                                            description: Custom identifier to correlate this processor across outputs
+                                                            minLength: 1
+                                                            type: string
+                                                          description:
+                                                            description: Human-readable notes about this processor step
+                                                            type: string
+                                                          from:
+                                                            description: Source field to redact sensitive data from
+                                                            minLength: 1
+                                                            type: string
+                                                          ignore_failure:
+                                                            description: Continue pipeline execution if this processor fails
+                                                            type: boolean
+                                                          ignore_missing:
+                                                            description: Skip processing when source field is missing (defaults to true)
+                                                            type: boolean
+                                                          pattern_definitions:
+                                                            additionalProperties:
+                                                              type: string
+                                                            description: Custom pattern definitions to use in the patterns
+                                                            type: object
+                                                          patterns:
+                                                            description: Grok patterns to match sensitive data (for example, "%{IP:client}", "%{EMAILADDRESS:email}")
+                                                            items:
+                                                              description: A non-empty string.
+                                                              minLength: 1
+                                                              type: string
+                                                            minItems: 1
+                                                            type: array
+                                                          prefix:
+                                                            description: Prefix to prepend to the redacted pattern name (defaults to "<")
+                                                            type: string
+                                                          suffix:
+                                                            description: Suffix to append to the redacted pattern name (defaults to ">")
+                                                            type: string
+                                                          where:
+                                                            anyOf:
+                                                              - anyOf:
+                                                                  - additionalProperties: false
+                                                                    description: A condition that compares a field to a value or range using an operator as the key.
+                                                                    type: object
+                                                                    properties:
+                                                                      contains:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                        description: Contains comparison value.
+                                                                      endsWith:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                        description: Ends-with comparison value.
+                                                                      eq:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                        description: Equality comparison value.
+                                                                      field:
+                                                                        description: The document field to filter on.
+                                                                        minLength: 1
+                                                                        type: string
+                                                                      gt:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                        description: Greater-than comparison value.
+                                                                      gte:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                        description: Greater-than-or-equal comparison value.
+                                                                      includes:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                        description: Checks if multivalue field includes the value.
+                                                                      lt:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                        description: Less-than comparison value.
+                                                                      lte:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                        description: Less-than-or-equal comparison value.
+                                                                      neq:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                        description: Inequality comparison value.
+                                                                      range:
+                                                                        additionalProperties: false
+                                                                        description: Range comparison values.
+                                                                        type: object
+                                                                        properties:
+                                                                          gt:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                            description: A value that can be a string, number, or boolean.
+                                                                          gte:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                            description: A value that can be a string, number, or boolean.
+                                                                          lt:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                            description: A value that can be a string, number, or boolean.
+                                                                          lte:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                            description: A value that can be a string, number, or boolean.
+                                                                      startsWith:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                        description: Starts-with comparison value.
+                                                                    required:
+                                                                      - field
+                                                                  - additionalProperties: false
+                                                                    description: A condition that checks for the existence or non-existence of a field.
+                                                                    type: object
+                                                                    properties:
+                                                                      exists:
+                                                                        description: Indicates whether the field exists or not.
+                                                                        type: boolean
+                                                                      field:
+                                                                        description: The document field to check.
+                                                                        minLength: 1
+                                                                        type: string
+                                                                    required:
+                                                                      - field
+                                                                description: A basic filter condition, either unary or binary.
+                                                              - additionalProperties: false
+                                                                description: A logical AND that groups multiple conditions.
+                                                                type: object
+                                                                properties:
+                                                                  and:
+                                                                    description: An array of conditions. All sub-conditions must be true for this condition to be true.
+                                                                    items: {}
+                                                                    type: array
+                                                                required:
+                                                                  - and
+                                                              - additionalProperties: false
+                                                                description: A logical OR that groups multiple conditions.
+                                                                type: object
+                                                                properties:
+                                                                  or:
+                                                                    description: An array of conditions. At least one sub-condition must be true for this condition to be true.
+                                                                    items: {}
+                                                                    type: array
+                                                                required:
+                                                                  - or
+                                                              - additionalProperties: false
+                                                                description: A logical NOT that negates a condition.
+                                                                type: object
+                                                                properties:
+                                                                  not:
+                                                                    description: A condition that negates another condition.
+                                                                required:
+                                                                  - not
+                                                              - additionalProperties: false
+                                                                description: A condition that always evaluates to false.
+                                                                type: object
+                                                                properties:
+                                                                  never:
+                                                                    additionalProperties: false
+                                                                    description: An empty object. This condition never matches.
+                                                                    type: object
+                                                                    properties: {}
+                                                                required:
+                                                                  - never
+                                                              - additionalProperties: false
+                                                                description: A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.
+                                                                type: object
+                                                                properties:
+                                                                  always:
+                                                                    additionalProperties: false
+                                                                    description: An empty object. This condition always matches.
+                                                                    type: object
+                                                                    properties: {}
+                                                                required:
+                                                                  - always
+                                                            description: Conditional expression controlling whether this processor runs
+                                                        required:
+                                                          - action
+                                                          - from
+                                                          - patterns
                                                       - additionalProperties: false
                                                         description: Base processor options plus conditional execution
                                                         type: object
@@ -83051,6 +84755,221 @@ paths:
                                               - pattern
                                               - replacement
                                           - additionalProperties: false
+                                            description: Redact processor - Mask sensitive data using Grok patterns
+                                            type: object
+                                            properties:
+                                              action:
+                                                enum:
+                                                  - redact
+                                                type: string
+                                              customIdentifier:
+                                                description: Custom identifier to correlate this processor across outputs
+                                                minLength: 1
+                                                type: string
+                                              description:
+                                                description: Human-readable notes about this processor step
+                                                type: string
+                                              from:
+                                                description: Source field to redact sensitive data from
+                                                minLength: 1
+                                                type: string
+                                              ignore_failure:
+                                                description: Continue pipeline execution if this processor fails
+                                                type: boolean
+                                              ignore_missing:
+                                                description: Skip processing when source field is missing (defaults to true)
+                                                type: boolean
+                                              pattern_definitions:
+                                                additionalProperties:
+                                                  type: string
+                                                description: Custom pattern definitions to use in the patterns
+                                                type: object
+                                              patterns:
+                                                description: Grok patterns to match sensitive data (for example, "%{IP:client}", "%{EMAILADDRESS:email}")
+                                                items:
+                                                  description: A non-empty string.
+                                                  minLength: 1
+                                                  type: string
+                                                minItems: 1
+                                                type: array
+                                              prefix:
+                                                description: Prefix to prepend to the redacted pattern name (defaults to "<")
+                                                type: string
+                                              suffix:
+                                                description: Suffix to append to the redacted pattern name (defaults to ">")
+                                                type: string
+                                              where:
+                                                anyOf:
+                                                  - anyOf:
+                                                      - additionalProperties: false
+                                                        description: A condition that compares a field to a value or range using an operator as the key.
+                                                        type: object
+                                                        properties:
+                                                          contains:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                            description: Contains comparison value.
+                                                          endsWith:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                            description: Ends-with comparison value.
+                                                          eq:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                            description: Equality comparison value.
+                                                          field:
+                                                            description: The document field to filter on.
+                                                            minLength: 1
+                                                            type: string
+                                                          gt:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                            description: Greater-than comparison value.
+                                                          gte:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                            description: Greater-than-or-equal comparison value.
+                                                          includes:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                            description: Checks if multivalue field includes the value.
+                                                          lt:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                            description: Less-than comparison value.
+                                                          lte:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                            description: Less-than-or-equal comparison value.
+                                                          neq:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                            description: Inequality comparison value.
+                                                          range:
+                                                            additionalProperties: false
+                                                            description: Range comparison values.
+                                                            type: object
+                                                            properties:
+                                                              gt:
+                                                                anyOf:
+                                                                  - type: string
+                                                                  - type: number
+                                                                  - type: boolean
+                                                                description: A value that can be a string, number, or boolean.
+                                                              gte:
+                                                                anyOf:
+                                                                  - type: string
+                                                                  - type: number
+                                                                  - type: boolean
+                                                                description: A value that can be a string, number, or boolean.
+                                                              lt:
+                                                                anyOf:
+                                                                  - type: string
+                                                                  - type: number
+                                                                  - type: boolean
+                                                                description: A value that can be a string, number, or boolean.
+                                                              lte:
+                                                                anyOf:
+                                                                  - type: string
+                                                                  - type: number
+                                                                  - type: boolean
+                                                                description: A value that can be a string, number, or boolean.
+                                                          startsWith:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                            description: Starts-with comparison value.
+                                                        required:
+                                                          - field
+                                                      - additionalProperties: false
+                                                        description: A condition that checks for the existence or non-existence of a field.
+                                                        type: object
+                                                        properties:
+                                                          exists:
+                                                            description: Indicates whether the field exists or not.
+                                                            type: boolean
+                                                          field:
+                                                            description: The document field to check.
+                                                            minLength: 1
+                                                            type: string
+                                                        required:
+                                                          - field
+                                                    description: A basic filter condition, either unary or binary.
+                                                  - additionalProperties: false
+                                                    description: A logical AND that groups multiple conditions.
+                                                    type: object
+                                                    properties:
+                                                      and:
+                                                        description: An array of conditions. All sub-conditions must be true for this condition to be true.
+                                                        items: {}
+                                                        type: array
+                                                    required:
+                                                      - and
+                                                  - additionalProperties: false
+                                                    description: A logical OR that groups multiple conditions.
+                                                    type: object
+                                                    properties:
+                                                      or:
+                                                        description: An array of conditions. At least one sub-condition must be true for this condition to be true.
+                                                        items: {}
+                                                        type: array
+                                                    required:
+                                                      - or
+                                                  - additionalProperties: false
+                                                    description: A logical NOT that negates a condition.
+                                                    type: object
+                                                    properties:
+                                                      not:
+                                                        description: A condition that negates another condition.
+                                                    required:
+                                                      - not
+                                                  - additionalProperties: false
+                                                    description: A condition that always evaluates to false.
+                                                    type: object
+                                                    properties:
+                                                      never:
+                                                        additionalProperties: false
+                                                        description: An empty object. This condition never matches.
+                                                        type: object
+                                                        properties: {}
+                                                    required:
+                                                      - never
+                                                  - additionalProperties: false
+                                                    description: A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.
+                                                    type: object
+                                                    properties:
+                                                      always:
+                                                        additionalProperties: false
+                                                        description: An empty object. This condition always matches.
+                                                        type: object
+                                                        properties: {}
+                                                    required:
+                                                      - always
+                                                description: Conditional expression controlling whether this processor runs
+                                            required:
+                                              - action
+                                              - from
+                                              - patterns
+                                          - additionalProperties: false
                                             description: Base processor options plus conditional execution
                                             type: object
                                             properties:
@@ -84855,6 +86774,16 @@ paths:
                                                   - boolean
                                                   - ip
                                                   - geo_point
+                                                  - integer
+                                                  - short
+                                                  - byte
+                                                  - float
+                                                  - half_float
+                                                  - text
+                                                  - wildcard
+                                                  - version
+                                                  - unsigned_long
+                                                  - date_nanos
                                                 type: string
                                             required:
                                               - type
@@ -87226,6 +89155,221 @@ paths:
                                               - pattern
                                               - replacement
                                           - additionalProperties: false
+                                            description: Redact processor - Mask sensitive data using Grok patterns
+                                            type: object
+                                            properties:
+                                              action:
+                                                enum:
+                                                  - redact
+                                                type: string
+                                              customIdentifier:
+                                                description: Custom identifier to correlate this processor across outputs
+                                                minLength: 1
+                                                type: string
+                                              description:
+                                                description: Human-readable notes about this processor step
+                                                type: string
+                                              from:
+                                                description: Source field to redact sensitive data from
+                                                minLength: 1
+                                                type: string
+                                              ignore_failure:
+                                                description: Continue pipeline execution if this processor fails
+                                                type: boolean
+                                              ignore_missing:
+                                                description: Skip processing when source field is missing (defaults to true)
+                                                type: boolean
+                                              pattern_definitions:
+                                                additionalProperties:
+                                                  type: string
+                                                description: Custom pattern definitions to use in the patterns
+                                                type: object
+                                              patterns:
+                                                description: Grok patterns to match sensitive data (for example, "%{IP:client}", "%{EMAILADDRESS:email}")
+                                                items:
+                                                  description: A non-empty string.
+                                                  minLength: 1
+                                                  type: string
+                                                minItems: 1
+                                                type: array
+                                              prefix:
+                                                description: Prefix to prepend to the redacted pattern name (defaults to "<")
+                                                type: string
+                                              suffix:
+                                                description: Suffix to append to the redacted pattern name (defaults to ">")
+                                                type: string
+                                              where:
+                                                anyOf:
+                                                  - anyOf:
+                                                      - additionalProperties: false
+                                                        description: A condition that compares a field to a value or range using an operator as the key.
+                                                        type: object
+                                                        properties:
+                                                          contains:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                            description: Contains comparison value.
+                                                          endsWith:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                            description: Ends-with comparison value.
+                                                          eq:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                            description: Equality comparison value.
+                                                          field:
+                                                            description: The document field to filter on.
+                                                            minLength: 1
+                                                            type: string
+                                                          gt:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                            description: Greater-than comparison value.
+                                                          gte:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                            description: Greater-than-or-equal comparison value.
+                                                          includes:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                            description: Checks if multivalue field includes the value.
+                                                          lt:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                            description: Less-than comparison value.
+                                                          lte:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                            description: Less-than-or-equal comparison value.
+                                                          neq:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                            description: Inequality comparison value.
+                                                          range:
+                                                            additionalProperties: false
+                                                            description: Range comparison values.
+                                                            type: object
+                                                            properties:
+                                                              gt:
+                                                                anyOf:
+                                                                  - type: string
+                                                                  - type: number
+                                                                  - type: boolean
+                                                                description: A value that can be a string, number, or boolean.
+                                                              gte:
+                                                                anyOf:
+                                                                  - type: string
+                                                                  - type: number
+                                                                  - type: boolean
+                                                                description: A value that can be a string, number, or boolean.
+                                                              lt:
+                                                                anyOf:
+                                                                  - type: string
+                                                                  - type: number
+                                                                  - type: boolean
+                                                                description: A value that can be a string, number, or boolean.
+                                                              lte:
+                                                                anyOf:
+                                                                  - type: string
+                                                                  - type: number
+                                                                  - type: boolean
+                                                                description: A value that can be a string, number, or boolean.
+                                                          startsWith:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                            description: Starts-with comparison value.
+                                                        required:
+                                                          - field
+                                                      - additionalProperties: false
+                                                        description: A condition that checks for the existence or non-existence of a field.
+                                                        type: object
+                                                        properties:
+                                                          exists:
+                                                            description: Indicates whether the field exists or not.
+                                                            type: boolean
+                                                          field:
+                                                            description: The document field to check.
+                                                            minLength: 1
+                                                            type: string
+                                                        required:
+                                                          - field
+                                                    description: A basic filter condition, either unary or binary.
+                                                  - additionalProperties: false
+                                                    description: A logical AND that groups multiple conditions.
+                                                    type: object
+                                                    properties:
+                                                      and:
+                                                        description: An array of conditions. All sub-conditions must be true for this condition to be true.
+                                                        items: {}
+                                                        type: array
+                                                    required:
+                                                      - and
+                                                  - additionalProperties: false
+                                                    description: A logical OR that groups multiple conditions.
+                                                    type: object
+                                                    properties:
+                                                      or:
+                                                        description: An array of conditions. At least one sub-condition must be true for this condition to be true.
+                                                        items: {}
+                                                        type: array
+                                                    required:
+                                                      - or
+                                                  - additionalProperties: false
+                                                    description: A logical NOT that negates a condition.
+                                                    type: object
+                                                    properties:
+                                                      not:
+                                                        description: A condition that negates another condition.
+                                                    required:
+                                                      - not
+                                                  - additionalProperties: false
+                                                    description: A condition that always evaluates to false.
+                                                    type: object
+                                                    properties:
+                                                      never:
+                                                        additionalProperties: false
+                                                        description: An empty object. This condition never matches.
+                                                        type: object
+                                                        properties: {}
+                                                    required:
+                                                      - never
+                                                  - additionalProperties: false
+                                                    description: A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.
+                                                    type: object
+                                                    properties:
+                                                      always:
+                                                        additionalProperties: false
+                                                        description: An empty object. This condition always matches.
+                                                        type: object
+                                                        properties: {}
+                                                    required:
+                                                      - always
+                                                description: Conditional expression controlling whether this processor runs
+                                            required:
+                                              - action
+                                              - from
+                                              - patterns
+                                          - additionalProperties: false
                                             description: Base processor options plus conditional execution
                                             type: object
                                             properties:
@@ -89030,6 +91174,16 @@ paths:
                                                   - boolean
                                                   - ip
                                                   - geo_point
+                                                  - integer
+                                                  - short
+                                                  - byte
+                                                  - float
+                                                  - half_float
+                                                  - text
+                                                  - wildcard
+                                                  - version
+                                                  - unsigned_long
+                                                  - date_nanos
                                                 type: string
                                             required:
                                               - type
@@ -99621,18 +101775,6 @@ components:
             body:
               type: string
         - $ref: '#/components/schemas/APM_UI_base_source_map_object'
-    Cases_4xx_response:
-      properties:
-        error:
-          example: Unauthorized
-          type: string
-        message:
-          type: string
-        statusCode:
-          example: 401
-          type: integer
-      title: Unsuccessful cases API response
-      type: object
     Cases_actions:
       enum:
         - add
@@ -100143,7 +102285,6 @@ components:
       title: Case response properties for updated_by
       type: object
     Cases_case_severity:
-      default: low
       description: The severity of the case.
       enum:
         - critical
@@ -100854,6 +102995,18 @@ components:
               enum:
                 - user
               type: string
+    Cases_response_4xx:
+      properties:
+        error:
+          example: Unauthorized
+          type: string
+        message:
+          type: string
+        statusCode:
+          example: 401
+          type: integer
+      title: Unsuccessful cases API response
+      type: object
     Cases_rule:
       description: |
         The rule that is associated with the alerts. It is required only when `type` is `alert`. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
@@ -102223,7 +104376,7 @@ components:
         - statusCode
     Saved_objects_attributes:
       description: |
-        The data that you want to create. WARNING: When you create saved objects, attributes are not validated, which allows you to pass arbitrary and ill-formed data into the API that can break Kibana. Make sure any data that you send to the API is properly formed.
+        The data that you want to create. WARNING: Attributes may be validated depending on the saved object type. Supplying malformed data can cause errors or break Kibana. When creating or persisting raw saved objects outside of Kibana, preserve `coreMigrationVersion` and `typeMigrationVersion` (and related migration metadata) to retain forward compatibility across Kibana versions.
       type: object
     Saved_objects_initial_namespaces:
       description: |
@@ -119821,6 +121974,10 @@ components:
         apiUrl:
           type: string
           description: The Amazon Bedrock request URL.
+        region:
+          type: string
+          description: |
+            Optional AWS region for request signing. Required when using a custom endpoint URL that does not include the region in the hostname (for example, `us-west-1`).
         defaultModel:
           type: string
           description: |

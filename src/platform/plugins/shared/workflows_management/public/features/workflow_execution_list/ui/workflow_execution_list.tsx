@@ -155,6 +155,7 @@ export const WorkflowExecutionList = ({
                   showExecutor={showExecutor}
                   selected={execution.id === selectedId}
                   onClick={() => onExecutionClick(execution.id)}
+                  aiFailureExplanation={execution.aiFailureExplanation}
                 />
               </EuiFlexItem>
               {/* Observer element for infinite scrolling - attached to last item */}

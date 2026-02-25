@@ -30,6 +30,34 @@ const defaultProps = {
 };
 
 describe('WorkflowExecutionListItem', () => {
+  describe('AI failure beacon', () => {
+    it('should render beacon when aiFailureExplanation is provided', () => {
+      render(
+        <WorkflowExecutionListItem
+          {...defaultProps}
+          status={ExecutionStatus.FAILED}
+          aiFailureExplanation={{
+            explanation: 'The HTTP step failed due to a 404.',
+          }}
+        />
+      );
+
+      expect(screen.getByTestId('aiFailureBeacon')).toBeInTheDocument();
+    });
+
+    it('should not render beacon when aiFailureExplanation is not provided', () => {
+      render(<WorkflowExecutionListItem {...defaultProps} status={ExecutionStatus.FAILED} />);
+
+      expect(screen.queryByTestId('aiFailureBeacon')).not.toBeInTheDocument();
+    });
+
+    it('should not render beacon for completed executions', () => {
+      render(<WorkflowExecutionListItem {...defaultProps} status={ExecutionStatus.COMPLETED} />);
+
+      expect(screen.queryByTestId('aiFailureBeacon')).not.toBeInTheDocument();
+    });
+  });
+
   describe('showExecutor feature flag', () => {
     it('should not render executor when showExecutor is false (default)', () => {
       render(<WorkflowExecutionListItem {...defaultProps} />);

@@ -10,6 +10,7 @@
 import type { EuiThemeComputed, UseEuiTheme } from '@elastic/eui';
 import {
   EuiAvatar,
+  EuiBeacon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -50,6 +51,10 @@ interface WorkflowExecutionListItemProps {
   showExecutor?: boolean;
   selected?: boolean;
   onClick?: () => void;
+  aiFailureExplanation?: {
+    explanation: string;
+    suggestedFix?: string;
+  };
 }
 export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemProps>(
   ({
@@ -62,6 +67,7 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
     showExecutor = false,
     selected,
     onClick,
+    aiFailureExplanation,
   }) => {
     const { euiTheme } = useEuiTheme();
     const styles = useMemoCss(componentStyles);
@@ -102,12 +108,38 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
           <EuiFlexItem>
             <EuiFlexGroup direction="column" gutterSize="xs">
               <EuiFlexItem>
-                <EuiText
-                  size="s"
-                  css={{ fontWeight: 'bold', color: getExecutionTitleColor(euiTheme, status) }}
-                >
-                  {getStatusLabel(status)}
-                </EuiText>
+                <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiText
+                      size="s"
+                      css={{
+                        fontWeight: 'bold',
+                        color: getExecutionTitleColor(euiTheme, status),
+                      }}
+                    >
+                      {getStatusLabel(status)}
+                    </EuiText>
+                  </EuiFlexItem>
+                  {aiFailureExplanation && (
+                    <EuiFlexItem grow={false}>
+                      <EuiToolTip
+                        position="right"
+                        content={aiFailureExplanation.explanation}
+                        title={i18n.translate(
+                          'workflows.workflowExecutionListItem.aiAnalysisTooltip',
+                          { defaultMessage: 'AI Failure Analysis' }
+                        )}
+                      >
+                        <EuiBeacon
+                          color="danger"
+                          size={8}
+                          css={{ cursor: 'pointer' }}
+                          data-test-subj="aiFailureBeacon"
+                        />
+                      </EuiToolTip>
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
               </EuiFlexItem>
               <EuiFlexItem>
                 {startedAt ? (

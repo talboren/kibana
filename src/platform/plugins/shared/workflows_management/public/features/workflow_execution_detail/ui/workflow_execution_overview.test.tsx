@@ -18,6 +18,12 @@ const renderWithIntl = (component: React.ReactElement) => {
   return render(component, { wrapper: I18nProvider });
 };
 
+jest.mock('./ai_failure_callout', () => ({
+  AiFailureCallout: ({ aiFailureExplanation }: any) => (
+    <div data-test-subj="mocked-ai-failure-callout">{aiFailureExplanation.explanation}</div>
+  ),
+}));
+
 jest.mock('./step_execution_data_view', () => ({
   StepExecutionDataView: ({ stepExecution, mode }: any) => (
     <div data-test-subj="mocked-step-execution-data-view">
@@ -290,6 +296,39 @@ describe('WorkflowExecutionOverview', () => {
       renderWithIntl(<WorkflowExecutionOverview stepExecution={stepExecution} />);
 
       expect(screen.getByTestId('mocked-step-execution-data-view')).toBeInTheDocument();
+    });
+  });
+
+  describe('AI failure callout', () => {
+    it('should render the AI failure callout when aiFailureExplanation is provided', () => {
+      const stepExecution = createMockStepExecution({ status: ExecutionStatus.FAILED });
+      renderWithIntl(
+        <WorkflowExecutionOverview
+          stepExecution={stepExecution}
+          aiFailureExplanation={{
+            explanation: 'The HTTP step failed because the URL returned a 404.',
+          }}
+        />
+      );
+
+      expect(screen.getByTestId('mocked-ai-failure-callout')).toBeInTheDocument();
+      expect(
+        screen.getByText('The HTTP step failed because the URL returned a 404.')
+      ).toBeInTheDocument();
+    });
+
+    it('should not render the AI failure callout when aiFailureExplanation is not provided', () => {
+      const stepExecution = createMockStepExecution({ status: ExecutionStatus.FAILED });
+      renderWithIntl(<WorkflowExecutionOverview stepExecution={stepExecution} />);
+
+      expect(screen.queryByTestId('mocked-ai-failure-callout')).not.toBeInTheDocument();
+    });
+
+    it('should not render the AI failure callout for completed executions', () => {
+      const stepExecution = createMockStepExecution({ status: ExecutionStatus.COMPLETED });
+      renderWithIntl(<WorkflowExecutionOverview stepExecution={stepExecution} />);
+
+      expect(screen.queryByTestId('mocked-ai-failure-callout')).not.toBeInTheDocument();
     });
   });
 

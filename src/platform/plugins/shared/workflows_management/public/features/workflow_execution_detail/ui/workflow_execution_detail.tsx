@@ -147,6 +147,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
               stepExecution={selectedStepExecution}
               workflowExecutionDuration={workflowExecution?.duration ?? undefined}
               isLoadingStepData={isLoadingStepData && !isPseudoStep}
+              aiFailureExplanation={workflowExecution?.aiFailureExplanation}
             />
           }
           minFlexPanelSize={200}

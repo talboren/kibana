@@ -9,6 +9,8 @@
 
 import apm from 'elastic-apm-node';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import { ExecutionStatus } from '@kbn/workflows';
+import { generateFailureExplanation } from './generate_failure_explanation';
 import { setupDependencies } from './setup_dependencies';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 import type { WorkflowsMeteringService } from '../metering';
@@ -77,6 +79,38 @@ export async function runWorkflow({
     throw error;
   } finally {
     loopSpan?.end();
+  }
+
+  // AI failure explanation (best-effort, non-blocking)
+  if (dependencies.inference) {
+    try {
+      const finalExecution = workflowExecutionState.getWorkflowExecution();
+      if (finalExecution.status === ExecutionStatus.FAILED && finalExecution.error) {
+        const failedSteps = workflowExecutionState
+          .getAllStepExecutions()
+          .filter((s) => s.status === ExecutionStatus.FAILED);
+
+        const explanation = await generateFailureExplanation(
+          dependencies.inference,
+          fakeRequest,
+          finalExecution,
+          failedSteps,
+          logger
+        );
+        if (explanation) {
+          await workflowExecutionRepository.updateWorkflowExecution({
+            id: workflowRunId,
+            aiFailureExplanation: explanation,
+          });
+        }
+      }
+    } catch (err) {
+      logger.warn(
+        `[AI Failure Explanation] Failed to generate explanation (execution=${workflowRunId}): ${
+          err instanceof Error ? err.message : String(err)
+        }`
+      );
+    }
   }
 
   // Report metering after execution completes and state is flushed.

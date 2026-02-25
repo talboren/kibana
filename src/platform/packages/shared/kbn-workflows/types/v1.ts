@@ -115,6 +115,11 @@ export interface EsWorkflowExecution {
   queueMetrics?: QueueMetrics; // Queue delay metrics for observability
   /** IDs of all step executions, enables O(1) mget lookup instead of search */
   stepExecutionIds?: string[];
+  /** AI-generated explanation of why a workflow execution failed */
+  aiFailureExplanation?: {
+    explanation: string;
+    suggestedFix?: string;
+  };
 }
 
 export interface ProviderInput {
@@ -203,6 +208,11 @@ export interface WorkflowExecutionDto {
   context?: Record<string, unknown>;
   traceId?: string; // APM trace ID for observability
   entryTransactionId?: string; // APM root transaction ID for trace embeddable
+  /** AI-generated explanation of why a workflow execution failed */
+  aiFailureExplanation?: {
+    explanation: string;
+    suggestedFix?: string;
+  };
 }
 
 export type WorkflowExecutionListItemDto = Omit<

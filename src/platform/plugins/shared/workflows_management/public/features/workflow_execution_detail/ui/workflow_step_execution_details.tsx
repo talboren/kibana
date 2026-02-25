@@ -31,10 +31,20 @@ interface WorkflowStepExecutionDetailsProps {
   stepExecution?: WorkflowStepExecutionDto;
   workflowExecutionDuration?: number;
   isLoadingStepData?: boolean;
+  aiFailureExplanation?: {
+    explanation: string;
+    suggestedFix?: string;
+  };
 }
 
 export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDetailsProps>(
-  ({ workflowExecutionId, stepExecution, workflowExecutionDuration, isLoadingStepData }) => {
+  ({
+    workflowExecutionId,
+    stepExecution,
+    workflowExecutionDuration,
+    isLoadingStepData,
+    aiFailureExplanation,
+  }) => {
     const isFinished = useMemo(
       () => Boolean(stepExecution?.status && isTerminalStatus(stepExecution.status)),
       [stepExecution?.status]
@@ -97,6 +107,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
         <WorkflowExecutionOverview
           stepExecution={stepExecution}
           workflowExecutionDuration={workflowExecutionDuration}
+          aiFailureExplanation={aiFailureExplanation}
         />
       );
     }

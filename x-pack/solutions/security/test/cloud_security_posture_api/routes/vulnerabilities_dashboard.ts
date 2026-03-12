@@ -124,7 +124,7 @@ export default function (providerContext: FtrProviderContext) {
       await vulnerabilitiesIndex.deleteAll();
       await scoresIndex.deleteAll();
       await waitForPluginInitialized({ retry, logger, supertest });
-      await scoresIndex.addBulk(scoresVulnerabilitiesMock, false);
+      await scoresIndex.addBulk(scoresVulnerabilitiesMock);
       await vulnerabilitiesIndex.addBulk(vulnerabilitiesLatestMock, false);
     });
 

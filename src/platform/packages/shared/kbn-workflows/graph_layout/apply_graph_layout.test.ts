@@ -338,7 +338,6 @@ describe('applyGraphLayout', () => {
     const { nodes: laid, edges: laidEdges } = applyGraphLayout(nodes, edges, foreachGroups);
     const loop = findLaidNode(laid, 'loop');
     const innerA = findLaidNode(laid, 'inner-a');
-    const innerB = findLaidNode(laid, 'inner-b');
     const innerEdge = findLaidEdge(laidEdges, 'inner-a', 'inner-b');
     expect(innerA.position.x).toBeGreaterThanOrEqual(32);
     expect(innerA.position.y).toBeGreaterThanOrEqual(70);

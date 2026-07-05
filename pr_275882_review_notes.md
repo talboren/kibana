@@ -9,7 +9,7 @@ Source: thermo-nuclear-code-quality-review + /deslop passes, cross-checked manua
 - [x] Blocker: `TypeIcon` reimplemented `StepIcon`'s icon resolution — fixed by extracting `resolveRegisteredStepIcon` into `kbn-workflows-ui`. Commit b7ba7d0, pushed to semd/kibana workflows/catalog-browser-ui. Thread resolved: https://github.com/elastic/kibana/pull/275882#discussion_r3525046604
 - [ ] ~~"Blocker": `library_fetcher.ts` defaults to staging CDN URL~~ — FALSE POSITIVE. Explicitly documented as deliberate/temporary in a `TODO` comment above `DEFAULT_LIBRARY_REGISTRY_URL` and in the PR's own `[!NOTE]`. Do not comment on this.
 - [ ] High: bootstrap deep links default `libraryEnabled` to `true` while the uiSetting defaults to `false` (`deep_links.ts` line 31, `plugin.ts` line 112) — reviewed, decided **not interesting**, skipping.
-- [ ] High: facet counts ignore active solution filter (`catalog_browser.tsx` ~144-164, `category_facets.tsx` ~270-278) — not yet reviewed.
+- [x] High: facet counts ignore active solution filter (`catalog_browser.tsx`, `category_facets.tsx`) — fixed via `facetScopedTemplates` memo (scoped by search + solution, not category). Commit 920ab6c, pushed to semd/kibana workflows/catalog-browser-ui. Thread resolved: https://github.com/elastic/kibana/pull/275882#discussion_r3525113187
 - [ ] High: `eslint-disable-next-line react-hooks/exhaustive-deps` in `use_catalog.ts` (~39-42) — not yet reviewed.
 - [ ] High: `CatalogBrowser` doc says "only depends on core services" but `TypeIcon` requires `WorkflowsUiServicesProvider` — not yet reviewed.
 - [ ] High: comments claim library routes are gated when they're always registered (page-level `<Redirect>` gates instead) — not yet reviewed.

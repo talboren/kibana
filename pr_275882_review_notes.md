@@ -10,9 +10,9 @@ Source: thermo-nuclear-code-quality-review + /deslop passes, cross-checked manua
 - [ ] ~~"Blocker": `library_fetcher.ts` defaults to staging CDN URL~~ — FALSE POSITIVE. Explicitly documented as deliberate/temporary in a `TODO` comment above `DEFAULT_LIBRARY_REGISTRY_URL` and in the PR's own `[!NOTE]`. Do not comment on this.
 - [ ] High: bootstrap deep links default `libraryEnabled` to `true` while the uiSetting defaults to `false` (`deep_links.ts` line 31, `plugin.ts` line 112) — reviewed, decided **not interesting**, skipping.
 - [x] High: facet counts ignore active solution filter (`catalog_browser.tsx`, `category_facets.tsx`) — fixed via `facetScopedTemplates` memo (scoped by search + solution, not category). Commit 920ab6c, pushed to semd/kibana workflows/catalog-browser-ui. Thread resolved: https://github.com/elastic/kibana/pull/275882#discussion_r3525113187
-- [ ] High: `eslint-disable-next-line react-hooks/exhaustive-deps` in `use_catalog.ts` (~39-42) — not yet reviewed.
-- [ ] High: `CatalogBrowser` doc says "only depends on core services" but `TypeIcon` requires `WorkflowsUiServicesProvider` — not yet reviewed.
-- [ ] High: comments claim library routes are gated when they're always registered (page-level `<Redirect>` gates instead) — not yet reviewed.
+- [ ] High: `eslint-disable-next-line react-hooks/exhaustive-deps` in `use_catalog.ts` (~39-42) — reviewed, real root cause identified (caller passes unstable filters object), decided **skip**, not commenting/fixing.
+- [ ] High: `CatalogBrowser` doc says "only depends on core services" but `TypeIcon` requires `WorkflowsUiServicesProvider` (confirmed real: CatalogBrowser → TemplateCard → CatalogTemplateIcons → TypeIcon → useWorkflowsUiServices throws without the provider; provider is actually wired once at `application.tsx` app root, not per-page as PR description claims) — reviewed, decided **skip**.
+- [x] High: comments claim library routes are gated when they're always registered — fixed, both `catalog_browser.tsx` and `template_detail.tsx` page comments corrected to describe the page-level `useLibraryEnabled` + `<Redirect>` gate. Commit 4a75cab, pushed to semd/kibana workflows/catalog-browser-ui. Thread resolved: https://github.com/elastic/kibana/pull/275882#discussion_r3525144225
 
 ## Medium (not yet reviewed)
 

@@ -95,3 +95,14 @@ Follow existing patterns in the target area first; below are common defaults.
 - Make focused changes; avoid unrelated refactors.
 - Update docs and tests when behavior or usage changes.
 - Never remove, skip, or comment out tests to make them pass; fix the underlying code.
+
+## Cursor Cloud specific instructions
+Standard dev flow is in `dev_docs/getting_started/setting_up_a_development_env.mdx`. Notes specific to this VM:
+
+- **Node**: pinned to `.node-version` (24.14.1) and installed via `nvm` (set as the nvm `default`). Any `bash` invocation (login, interactive, or `bash -c`) resolves Node 24 + yarn 1.22.22 automatically. Caveat: `sh`/`dash` falls back to the system Node 22 at `/exec-daemon/node`, so always run dev commands through `bash`. The update script (`yarn kbn bootstrap`) handles dependency refresh.
+- **Running the stack** (two long-lived processes, run each in its own tmux session):
+  - Elasticsearch: `yarn es snapshot --license trial` → listens on `http://localhost:9200`, creds `elastic:changeme`.
+  - Kibana: `yarn start --no-base-path --mockIdpPlugin.enabled=false` → `http://localhost:5601`, basic login `elastic:changeme`. (Default `yarn start` uses a random base path + SAML mock IdP; the flags above give plain basic login on the root path, which is easiest for scripted/automated checks.)
+  - First `yarn start` compiles ~217 webpack bundles via `@kbn/optimizer` and can take several minutes; `GET /api/status` returns 503 until you see `Kibana is now available`.
+- **Optimizer cache gotcha (non-obvious)**: if an `@kbn/optimizer` worker crashes mid-build (the log shows `worker exitted unexpectedly with code null`), a plugin's `target/public/<id>.plugin.js` can be left missing while its `.kbn-optimizer-cache` still makes the next start report `all bundles cached`. The result is a global `Elastic did not load properly` screen in the browser (the missing bundle 404s, e.g. `securitySolution.plugin.js`). Fix: delete the affected plugin's `target/public` dir and restart `yarn start` so only that bundle rebuilds. Find broken bundles with: for each dir containing `.kbn-optimizer-cache`, flag those with no `*.js` sibling.
+- **Expected (not a bug)**: the browser console logs a CSP "inline script violates ... script-src" error for the `kbnUnsafeInlineTest` / `__kbnCspNotEnforced__` probe — this is Kibana's intentional CSP-enforcement check, not a failure.

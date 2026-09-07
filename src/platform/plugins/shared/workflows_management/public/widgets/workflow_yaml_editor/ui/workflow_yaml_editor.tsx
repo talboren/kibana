@@ -553,6 +553,7 @@ export const WorkflowYAMLEditor = ({
     editor: editorRef.current,
     yamlDocument: yamlDocument || null,
     isEditorMounted,
+    connectorTypes: connectorsData?.connectorTypes,
   });
 
   useLineDifferencesDecorations({

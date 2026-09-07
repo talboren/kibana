@@ -151,6 +151,32 @@ describe('getAvailableConnectors', () => {
     });
   });
 
+  it('returns action metadata for connector specs', async () => {
+    const actionsClient = {
+      getAll: jest.fn().mockResolvedValue([
+        mockConnector({
+          id: 'slack-2',
+          actionTypeId: '.slack2',
+          config: { authType: 'bearer' },
+        }),
+      ]),
+    };
+    const actionsClientWithRequest = {
+      listTypes: jest.fn().mockResolvedValue([mockActionType({ id: '.slack2', name: 'Slack' })]),
+    };
+
+    const result = await getAvailableConnectors({
+      getActionsClient: jest.fn().mockResolvedValue(actionsClient),
+      getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
+      spaceId: 'default',
+      request,
+    });
+
+    expect(result.connectorTypes['.slack2'].instances[0].supportedSubActions).toContain(
+      'sendMessage'
+    );
+  });
+
   it('includes inbound webhook types omitted from the workflows feature list', async () => {
     const inboundType = mockActionType({
       id: '.inboundWebhook',

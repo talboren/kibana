@@ -33,6 +33,7 @@ import {
 } from '@kbn/response-ops-rule-form/src/translations';
 import { isConnectorTypeTestable } from '../../../lib/is_connector_type_testable';
 import { CreateConnectorFilter } from './create_connector_filter';
+import { isActionTypeCreatable } from '../is_action_type_creatable';
 import type {
   ActionConnector,
   ActionType,
@@ -125,7 +126,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
           .filter(
             (item) =>
               allActionTypes &&
-              allActionTypes[item.id].enabledInConfig &&
+              isActionTypeCreatable(allActionTypes[item.id]) &&
               actionTypeRegistry.has(item.id)
           )
           .map((subtypeAction) => ({

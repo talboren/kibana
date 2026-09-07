@@ -52,6 +52,21 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     // await testSubjects.click('app-card-triggersActionsConnectors');
   };
 
+  const createServerLogConnector = async (name: string) => {
+    const { body } = await supertest
+      .post('/api/actions/connector')
+      .set('kbn-xsrf', 'foo')
+      .set('x-elastic-internal-origin', 'foo')
+      .send({
+        name,
+        config: {},
+        secrets: {},
+        connector_type_id: '.server-log',
+      })
+      .expect(200);
+    return body;
+  };
+
   const deleteConnector = async (connectorName: string) => {
     await svlTriggersActionsUI.searchConnectors(connectorName);
     await testSubjects.click('deleteConnector');
@@ -375,15 +390,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       it('should show and update deleted connectors when there are existing connectors of the same type', async () => {
         const testRunUuid = uuidv4();
 
-        const connector1 = await alertingApi.helpers.createSlackConnector({
-          roleAuthc,
-          name: `slack-${testRunUuid}-${0}`,
-        });
+        const connector1 = await createServerLogConnector(`server-log-${testRunUuid}-${0}`);
 
-        const connector2 = await alertingApi.helpers.createSlackConnector({
-          roleAuthc,
-          name: `slack-${testRunUuid}-${1}`,
-        });
+        const connector2 = await createServerLogConnector(`server-log-${testRunUuid}-${1}`);
 
         connectorIdList = [connector2.id];
 
@@ -454,7 +463,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await retry.tryForTime(15 * 1000, async () => {
           const connectorTitle = await ruleActionItems[0].getVisibleText();
-          expect(connectorTitle.includes('Slack')).toBe(true);
+          expect(connectorTitle.includes('Server log')).toBe(true);
         });
       });
     });
@@ -483,15 +492,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const testRunUuid = uuidv4();
         const RULE_TYPE_ID = '.es-query';
 
-        const connector1 = await alertingApi.helpers.createSlackConnector({
-          roleAuthc,
-          name: `slack-${testRunUuid}-${0}`,
-        });
+        const connector1 = await createServerLogConnector(`server-log-${testRunUuid}-${0}`);
 
-        const connector2 = await alertingApi.helpers.createSlackConnector({
-          roleAuthc,
-          name: `slack-${testRunUuid}-${1}`,
-        });
+        const connector2 = await createServerLogConnector(`server-log-${testRunUuid}-${1}`);
 
         connectorIdList = [connector1.id, connector2.id];
 

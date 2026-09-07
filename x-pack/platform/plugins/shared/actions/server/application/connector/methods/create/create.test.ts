@@ -339,6 +339,35 @@ describe('create()', () => {
     });
   });
 
+  describe('create-disabled connectors', () => {
+    test('rejects creating a new connector instance', async () => {
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(
+        getConnectorType({
+          id: 'my-connector-type',
+          isCreateDisabled: true,
+          validate: {
+            config: { schema: z.any() },
+            secrets: { schema: z.any() },
+            params: { schema: z.object({}) },
+          },
+        })
+      );
+
+      await expect(
+        create({
+          context: mockContext,
+          action: {
+            name: 'my name',
+            actionTypeId: 'my-connector-type',
+            config: {},
+            secrets: {},
+          },
+        })
+      ).rejects.toThrow('New connectors of action type my-connector-type cannot be created.');
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    });
+  });
+
   describe('Kibana managed auth types', () => {
     test('throws an error when creating a connector with a Kibana managed auth type', async () => {
       await expect(

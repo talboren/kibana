@@ -241,9 +241,10 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
           name,
           config: {},
           secrets: {
+            authType: 'webhook',
             webhookUrl: 'http://test',
           },
-          connector_type_id: '.slack',
+          connector_type_id: '.slack2',
         })
         .expect(200);
       return body;

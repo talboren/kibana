@@ -68,21 +68,64 @@ describe('EditConnectorFlyout', () => {
       ...appMockRenderer.coreStart.application.capabilities,
       actions: { save: true, show: true, execute: true },
     };
-    appMockRenderer.coreStart.http.get = jest.fn().mockResolvedValue([
-      {
-        id: '.test',
-        name: 'Test',
-        enabled: true,
-        enabled_in_config: true,
-        enabled_in_license: true,
-        supported_feature_ids: [],
-        minimum_license_required: 'basic',
-        is_system_action_type: false,
-        is_deprecated: false,
-      },
-    ]);
+    appMockRenderer.coreStart.http.get = jest.fn().mockImplementation(async (path) =>
+      path.endsWith('/access_control')
+        ? { permissions: { read: true, execute: true, edit: true, manage: true } }
+        : [
+            {
+              id: '.test',
+              name: 'Test',
+              enabled: true,
+              enabled_in_config: true,
+              enabled_in_license: true,
+              supported_feature_ids: [],
+              minimum_license_required: 'basic',
+              is_system_action_type: false,
+              is_deprecated: false,
+            },
+          ]
+    );
     appMockRenderer.coreStart.http.put = jest.fn().mockResolvedValue(updateConnectorResponse);
     appMockRenderer.coreStart.http.post = jest.fn().mockResolvedValue(executeConnectorResponse);
+  });
+
+  it('shows Access and allows the owner to open sharing', async () => {
+    appMockRenderer.coreStart.userProfile.getCurrent = jest
+      .fn()
+      .mockResolvedValue({ uid: 'owner', user: { username: 'owner' }, data: {} });
+    appMockRenderer.coreStart.userProfile.bulkGet = jest.fn().mockResolvedValue([]);
+    appMockRenderer.coreStart.userProfile.suggest = jest.fn().mockResolvedValue([]);
+    appMockRenderer.render(
+      <EditConnectorFlyout
+        actionTypeRegistry={actionTypeRegistry}
+        onClose={onClose}
+        connector={connector}
+      />
+    );
+    const button = await screen.findByTestId('connectorAccessButton');
+    await waitFor(() => expect(button).toBeEnabled());
+    await userEvent.click(button);
+    expect(await screen.findByText('Connector access')).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByTestId('connectorAccessSave')).toBeEnabled());
+  });
+
+  it('disables sharing and configuration changes for an Executor', async () => {
+    appMockRenderer.coreStart.http.get = jest
+      .fn()
+      .mockImplementation(async (path: string) =>
+        path.endsWith('/access_control')
+          ? { permissions: { read: true, execute: true, edit: false, manage: false } }
+          : []
+      );
+    appMockRenderer.render(
+      <EditConnectorFlyout
+        actionTypeRegistry={actionTypeRegistry}
+        onClose={onClose}
+        connector={connector}
+      />
+    );
+    await waitFor(() => expect(screen.getByTestId('connectorAccessButton')).toBeDisabled());
+    expect(document.querySelector('fieldset')).toBeDisabled();
   });
 
   it('renders', async () => {

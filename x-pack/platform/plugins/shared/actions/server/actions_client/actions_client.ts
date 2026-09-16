@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AccessControlInput } from '@kbn/entity-access-control';
 import Boom from '@hapi/boom';
 import url from 'url';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
@@ -26,6 +27,12 @@ import type { AxiosInstance } from 'axios';
 import type { SpacesServiceSetup } from '@kbn/spaces-plugin/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
 import type { AuthMode } from '@kbn/connector-specs';
+import type { ConnectorAccessResponse } from '../../common/access_control';
+import {
+  ensureConnectorAccess,
+  getConnectorAccess,
+  updateConnectorAccess,
+} from '../lib/connector_access_control';
 import type { Connector, ConnectorWithExtraFindData } from '../application/connector/types';
 import type { RotateInboundIngressResult } from '../application/connector/methods/rotate_inbound_ingress/types';
 import type { ConnectorType } from '../application/connector/types';
@@ -299,6 +306,18 @@ export class ActionsClient {
     });
   }
 
+  public getAccessControl(id: string): Promise<ConnectorAccessResponse> {
+    return getConnectorAccess(this.context, id);
+  }
+
+  public updateAccessControl(
+    id: string,
+    input: AccessControlInput<'executor'>,
+    validateRecipients: (uids: Set<string>) => Promise<void>
+  ): Promise<void> {
+    return updateConnectorAccess(this.context, id, input, validateRecipients);
+  }
+
   /**
    * Get bulk actions with in-memory list
    */
@@ -383,6 +402,7 @@ export class ActionsClient {
           `Failed to load action ${action.id} (${action.error.statusCode}): ${action.error.message}`
         );
       }
+      await ensureConnectorAccess(this.context, action.attributes, 'read');
       actionResults.push(
         connectorFromSavedObject(
           action,
@@ -591,6 +611,7 @@ export class ActionsClient {
       }
       throw e;
     }
+    await ensureConnectorAccess(this.context, rawAction.attributes, 'edit');
     const {
       attributes: { actionTypeId, config, authMode },
     } = rawAction;

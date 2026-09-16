@@ -114,3 +114,10 @@ export {
   OAUTH_CALLBACK_QUERY_PARAMS,
   OAUTH_BROADCAST_CHANNEL_NAME,
 } from './oauth_callback';
+
+export {
+  getConnectorPermissions,
+  connectorAccessControlSchema,
+  CONNECTOR_ACCESS_ROLES,
+} from './access_control';
+export type { ConnectorAccessSubject, ConnectorAccessResponse } from './access_control';

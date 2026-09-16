@@ -97,6 +97,7 @@ const postSaveHook = jest.fn();
 const postDeleteHook = jest.fn();
 const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
 const getAxiosInstanceWithAuth = jest.fn();
+const getCurrentUserProfileId = jest.fn();
 const isESOCanEncrypt = true;
 
 let actionsClient: ActionsClient;
@@ -160,12 +161,70 @@ beforeEach(() => {
     isESOCanEncrypt,
     getAxiosInstanceWithAuth,
     securityService,
+    getCurrentUserProfileId,
   });
   (getOAuthJwtAccessToken as jest.Mock).mockResolvedValue(`Bearer jwttokentokentoken`);
   (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValue(
     `Bearer clienttokentokentoken`
   );
   getEventLogClient.mockResolvedValue(eventLogClient);
+});
+
+describe('private connector access', () => {
+  const attributes = {
+    name: 'Private',
+    actionTypeId: '.webhook',
+    config: {},
+    secrets: {},
+    isMissingSecrets: false,
+    owner_id: 'owner',
+    access_control: {
+      access_mode: 'private',
+      entries: [
+        { type: 'user', id: 'executor', role: 'executor', added_at: '2026-09-16T00:00:00.000Z' },
+      ],
+    },
+  };
+  const savedObject = {
+    id: 'private',
+    type: 'action',
+    attributes,
+    references: [],
+    version: 'version-1',
+  };
+  beforeEach(() => {
+    unsecuredSavedObjectsClient.get.mockResolvedValue(savedObject);
+    unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({ saved_objects: [savedObject] });
+  });
+  test.each(['owner', 'executor'])('%s can read and bulk-read', async (profile) => {
+    getCurrentUserProfileId.mockResolvedValue(profile);
+    expect(await actionsClient.get({ id: 'private' })).toMatchObject({ id: 'private' });
+    expect(await actionsClient.getBulk({ ids: ['private'] })).toHaveLength(1);
+  });
+  test('an unlisted user cannot read or bulk-read', async () => {
+    getCurrentUserProfileId.mockResolvedValue('unlisted');
+    await expect(actionsClient.get({ id: 'private' })).rejects.toThrow('Connector not found');
+    await expect(actionsClient.getBulk({ ids: ['private'] })).rejects.toThrow(
+      'Connector not found'
+    );
+  });
+  test('an Executor cannot edit or delete', async () => {
+    getCurrentUserProfileId.mockResolvedValue('executor');
+    await expect(
+      actionsClient.update({ id: 'private', action: { name: 'changed', config: {}, secrets: {} } })
+    ).rejects.toThrow('Connector not found');
+    await expect(actionsClient.delete({ id: 'private' })).rejects.toThrow('Connector not found');
+    expect(unsecuredSavedObjectsClient.delete).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+  });
+  test('a listed Executor still needs feature RBAC to execute', async () => {
+    getCurrentUserProfileId.mockResolvedValue('executor');
+    authorization.ensureAuthorized.mockRejectedValue(new Error('RBAC denied'));
+    await expect(actionsClient.execute({ actionId: 'private', params: {} })).rejects.toThrow(
+      'RBAC denied'
+    );
+    expect(actionExecutor.execute).not.toHaveBeenCalled();
+  });
 });
 
 describe('create()', () => {

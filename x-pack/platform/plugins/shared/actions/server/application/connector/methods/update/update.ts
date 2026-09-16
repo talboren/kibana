@@ -10,6 +10,7 @@ import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { connectorTypeHasInboundEvents } from '@kbn/connector-specs';
 import { i18n } from '@kbn/i18n';
 import { isUndefined, omit, omitBy } from 'lodash';
+import { ensureConnectorAccess } from '../../../../lib/connector_access_control';
 import type { Connector } from '../../types';
 import type { ConnectorUpdateParams } from './types';
 import { PreconfiguredActionDisabledModificationError } from '../../../../lib/errors/preconfigured_action_disabled_modification';
@@ -77,6 +78,7 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
   }
   const { attributes, references, version } =
     await context.unsecuredSavedObjectsClient.get<RawAction>('action', id);
+  await ensureConnectorAccess(context, attributes, 'edit');
   const { actionTypeId, authMode } = attributes;
   const { name, config, secrets } = action;
 

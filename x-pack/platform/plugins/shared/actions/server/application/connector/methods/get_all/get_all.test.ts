@@ -69,6 +69,7 @@ const connectorTokenClient = connectorTokenClientMock.create();
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
 const getAxiosInstanceWithAuth = jest.fn();
+const getCurrentUserProfileId = jest.fn();
 const isESOCanEncrypt = true;
 
 let actionsClient: ActionsClient;
@@ -98,12 +99,65 @@ describe('getAll()', () => {
       encryptedSavedObjectsClient,
       isESOCanEncrypt,
       getAxiosInstanceWithAuth,
+      getCurrentUserProfileId,
     });
     (getOAuthJwtAccessToken as jest.Mock).mockResolvedValue(`Bearer jwttokentokentoken`);
     (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValue(
       `Bearer clienttokentokentoken`
     );
     getEventLogClient.mockResolvedValue(eventLogClient);
+  });
+
+  test.each([
+    ['owner', ['public', 'private']],
+    ['executor', ['public', 'private']],
+    ['unlisted', ['public']],
+    [undefined, ['public']],
+  ])('filters connector listing for %s', async (profile, ids) => {
+    getCurrentUserProfileId.mockResolvedValue(profile);
+    const base = {
+      name: 'Connector',
+      actionTypeId: '.webhook',
+      config: {},
+      isMissingSecrets: false,
+    };
+    unsecuredSavedObjectsClient.find.mockResolvedValue({
+      page: 1,
+      per_page: 100,
+      total: 2,
+      saved_objects: [
+        { id: 'public', type: 'action', attributes: base, references: [], score: 1 },
+        {
+          id: 'private',
+          type: 'action',
+          attributes: {
+            ...base,
+            owner_id: 'owner',
+            access_control: {
+              access_mode: 'private',
+              entries: [
+                {
+                  type: 'user',
+                  id: 'executor',
+                  role: 'executor',
+                  added_at: '2026-09-16T00:00:00.000Z',
+                },
+              ],
+            },
+          },
+          references: [],
+          score: 1,
+        },
+      ],
+    });
+    scopedClusterClient.asInternalUser.search.mockResponse({
+      took: 0,
+      timed_out: false,
+      _shards: { total: 1, successful: 1, failed: 0 },
+      hits: { hits: [] },
+      aggregations: { public: { doc_count: 0 }, private: { doc_count: 0 } },
+    });
+    expect((await actionsClient.getAll()).map(({ id }) => id)).toEqual(ids);
   });
 
   describe('getAll()', () => {

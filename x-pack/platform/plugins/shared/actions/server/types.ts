@@ -20,6 +20,7 @@ import type { LicenseType } from '@kbn/licensing-types';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type * as z4 from '@kbn/zod/v4';
 import type { AuthMode } from '@kbn/connector-specs';
+import type { ConnectorAccessSubject } from '../common/access_control';
 import type { ConnectorTokenClient } from './lib/connector_token_client';
 import type { ActionTypeExecutorResult, SubFeature, ActionTypeSource } from '../common';
 import type { ActionTypeRegistry } from './action_type_registry';
@@ -309,7 +310,7 @@ export type ClassicActionType<
   };
 };
 
-export interface RawAction extends Record<string, unknown> {
+export interface RawAction extends Record<string, unknown>, ConnectorAccessSubject {
   actionTypeId: string;
   name: string;
   isMissingSecrets: boolean;

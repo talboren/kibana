@@ -95,6 +95,7 @@ const actionExecutorInitializationParams = {
   encryptedSavedObjectsClient,
   eventLogger,
   getActionsAuthorizationWithRequest,
+  getCurrentUserProfileId: jest.fn(),
   getCurrentUserProfileIdFromAPIKey: jest.fn().mockResolvedValue(undefined),
   inMemoryConnectors: [
     createMockInMemoryConnector({
@@ -311,6 +312,78 @@ beforeEach(() => {
 });
 
 describe('Action Executor', () => {
+  describe('connector ACL', () => {
+    const privateExecutor = jest.fn();
+    beforeEach(() => {
+      connectorTypeRegistry.hasSubFeature.mockReturnValue(true);
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+        ...connectorSavedObject,
+        attributes: {
+          ...connectorSavedObject.attributes,
+          owner_id: 'owner',
+          access_control: {
+            access_mode: 'private',
+            entries: [
+              {
+                type: 'user',
+                id: 'executor',
+                role: 'executor',
+                added_at: '2026-09-16T00:00:00.000Z',
+              },
+            ],
+          },
+        },
+      });
+      connectorTypeRegistry.get.mockReturnValue({ ...connectorType, executor: privateExecutor });
+      privateExecutor.mockResolvedValue({ status: 'ok', actionId: CONNECTOR_ID });
+    });
+    test.each(['owner', 'executor'])('%s can execute a private connector', async (profile_uid) => {
+      securityMockStart.authc.getCurrentUser.mockReturnValue({ ...mockUser, profile_uid });
+      const result = await actionExecutor.execute(executeParams);
+      expect(result.status).toBe('ok');
+      expect(privateExecutor).toHaveBeenCalledTimes(1);
+      expect(authorizationMock.ensureAuthorized).toHaveBeenCalled();
+    });
+    test('resolves Basic-auth profiles from the request when the auth user has no UID', async () => {
+      securityMockStart.authc.getCurrentUser.mockReturnValue({
+        ...mockUser,
+        profile_uid: undefined,
+      });
+      actionExecutorInitializationParams.getCurrentUserProfileId.mockResolvedValue('executor');
+      expect((await actionExecutor.execute(executeParams)).status).toBe('ok');
+      expect(actionExecutorInitializationParams.getCurrentUserProfileId).toHaveBeenCalledWith(
+        executeParams.request
+      );
+      expect(privateExecutor).toHaveBeenCalledTimes(1);
+    });
+    test('an unlisted superuser cannot execute', async () => {
+      const result = await actionExecutor.execute(executeParams);
+      expect(result).toMatchObject({ status: 'error', retry: false });
+      expect(privateExecutor).not.toHaveBeenCalled();
+    });
+    test('an API key uses its profile to check the ACL', async () => {
+      securityMockStart.authc.getCurrentUser.mockReturnValue(null);
+      actionExecutorInitializationParams.getCurrentUserProfileIdFromAPIKey.mockResolvedValue(
+        'executor'
+      );
+      expect((await actionExecutor.execute(executeParams)).status).toBe('ok');
+      expect(privateExecutor).toHaveBeenCalledTimes(1);
+    });
+    test('missing caller context does not bypass a private ACL', async () => {
+      expect((await actionExecutor.executeUnsecured(executeUnsecuredParams)).status).toBe('error');
+      expect(privateExecutor).not.toHaveBeenCalled();
+    });
+    test('RBAC still denies a listed Executor', async () => {
+      securityMockStart.authc.getCurrentUser.mockReturnValue({
+        ...mockUser,
+        profile_uid: 'executor',
+      });
+      authorizationMock.ensureAuthorized.mockRejectedValue(new Error('RBAC denied'));
+      expect((await actionExecutor.execute(executeParams)).status).toBe('error');
+      expect(privateExecutor).not.toHaveBeenCalled();
+    });
+  });
+
   test('passes saved-object version only to spec connector executors', async () => {
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       ...connectorSavedObject,

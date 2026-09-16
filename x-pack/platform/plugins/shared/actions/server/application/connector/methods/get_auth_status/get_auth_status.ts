@@ -6,6 +6,7 @@
  */
 
 import type { AuthMode } from '@kbn/connector-specs';
+import { getConnectorPermissions } from '../../../../../common/access_control';
 import { findConnectorsSo } from '../../../../data/connector';
 import type { GetUserTokenConnectorsSoResult } from '../../../../data/connector/types';
 import { filterInferenceConnectors } from '../get_all';
@@ -48,12 +49,13 @@ export async function getAuthStatus({
   const { saved_objects: savedObjects } = await findConnectorsSo({
     savedObjectsClient: context.unsecuredSavedObjectsClient,
     namespace,
-    fields: ['authMode'],
+    fields: ['authMode', 'owner_id', 'access_control'],
   });
 
   const results: GetAuthStatusResult = {};
 
   for (const so of savedObjects) {
+    if (!getConnectorPermissions(so.attributes, profileUid).read) continue;
     const authMode = getAuthMode(
       (so.attributes as RawAction | undefined)?.authMode as Connector['authMode'] | undefined
     );

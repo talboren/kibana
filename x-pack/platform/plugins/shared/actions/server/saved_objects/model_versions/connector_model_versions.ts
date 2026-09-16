@@ -7,6 +7,7 @@
 
 import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import { rawConnectorSchema as rawConnectorSchemaV4 } from '../schemas/raw_connector/v4';
 import {
   rawConnectorSchemaV1,
   rawConnectorSchemaV2,
@@ -58,4 +59,11 @@ export const connectorModelVersions = (
     outputType: actionEncryptedRegistrationV3,
     shouldTransformIfDecryptionFails: true,
   }),
+  '4': {
+    changes: [],
+    schemas: {
+      create: rawConnectorSchemaV4,
+      forwardCompatibility: rawConnectorSchemaV4.extends({}, { unknowns: 'ignore' }),
+    },
+  },
 });

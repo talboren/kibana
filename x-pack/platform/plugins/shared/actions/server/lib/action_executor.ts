@@ -23,6 +23,7 @@ import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/se
 import { getErrorSource as getTaskManagerErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { isConnectorAuthorizationError } from '@kbn/connector-specs';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
+import { getConnectorPermissions } from '../../common/access_control';
 import { IN_MEMORY_CONNECTOR_REVISION } from './single_file_connectors/build_client_lease_key';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
 import { ConnectorUsageCollector } from '../usage/connector_usage_collector';
@@ -76,6 +77,7 @@ export interface ActionExecutorContext {
   eventLogger: IEventLogger;
   inMemoryConnectors: InMemoryConnector[];
   getActionsAuthorizationWithRequest: (request: KibanaRequest) => ActionsAuthorization;
+  getCurrentUserProfileId?: (request: KibanaRequest) => Promise<string | undefined>;
   getCurrentUserProfileIdFromAPIKey: (request: KibanaRequest) => Promise<string | undefined>;
 }
 
@@ -430,7 +432,12 @@ export class ActionExecutor {
         const { actionTypeId, name, config, secrets, rawAction, connectorVersion, isInMemory } =
           actionInfo;
         const authMode = rawAction.authMode;
-        const profileUid = providedProfileUid || currentUser?.profile_uid;
+        const profileUid =
+          providedProfileUid ||
+          currentUser?.profile_uid ||
+          (request && rawAction.access_control?.access_mode === 'private'
+            ? await this.actionExecutorContext!.getCurrentUserProfileId?.(request)
+            : undefined);
         const loggerId = actionTypeId.startsWith('.') ? actionTypeId.substring(1) : actionTypeId;
         const logger = this.actionExecutorContext!.logger.get(loggerId);
 
@@ -546,6 +553,19 @@ export class ActionExecutor {
         let validatedConfig;
         let validatedSecrets;
         try {
+          if (!getConnectorPermissions(rawAction, profileUid).execute) {
+            throw new ActionExecutionError(
+              'Connector not found',
+              ActionExecutionErrorReason.Authorization,
+              {
+                actionId,
+                status: 'error',
+                message: 'Connector not found',
+                retry: false,
+                errorSource: TaskErrorSource.USER,
+              }
+            );
+          }
           const validationResult = validateAction(
             {
               actionId,

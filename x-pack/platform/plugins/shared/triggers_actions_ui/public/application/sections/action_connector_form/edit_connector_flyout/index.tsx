@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import type { ReactNode } from 'react';
 import React, { memo, useCallback, useEffect, useRef, useMemo, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
@@ -29,6 +30,7 @@ import type { Option } from 'fp-ts/Option';
 import { none, some } from 'fp-ts/Option';
 import type { ConnectorFormSchema } from '@kbn/alerts-ui-shared';
 import { useActionTypeModel } from '@kbn/alerts-ui-shared/src/common/hooks/use_action_type_model';
+import { ConnectorAccess, useConnectorAccess } from './connector_access';
 import { ReadOnlyConnectorMessage } from './read_only';
 import type {
   ActionConnector,
@@ -180,7 +182,14 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
   } = useKibana().services;
 
   const isMounted = useRef(false);
-  const canSave = hasSaveActionsCapability(capabilities);
+  const isStoredConnector = !connector.isPreconfigured && !connector.isSystemAction;
+  const { data: access, refetch: refetchAccess } = useConnectorAccess(
+    connector.id,
+    isStoredConnector
+  );
+  const canSave =
+    hasSaveActionsCapability(capabilities) &&
+    (!isStoredConnector || access?.permissions.edit === true);
   const { isLoading: isUpdatingConnector, updateConnector } = useUpdateConnector();
   const { isLoading: isExecutingConnector, executeConnector } = useExecuteConnector();
   const [showFormErrors, setShowFormErrors] = useState<boolean>(false);
@@ -544,7 +553,22 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
         docsUrl={actionTypeModel?.docsUrl}
       />
       <EuiFlyoutBody>
-        {selectedTab === EditConnectorTabs.Configuration && renderConfigurationTab()}
+        {isStoredConnector && (
+          <ConnectorAccess
+            id={connector.id}
+            access={access}
+            canSave={canSave}
+            onSaved={refetchAccess}
+          />
+        )}
+        {selectedTab === EditConnectorTabs.Configuration && (
+          <fieldset
+            disabled={!canSave}
+            css={css({ border: 0, padding: 0, margin: 0, minWidth: 0 })}
+          >
+            {renderConfigurationTab()}
+          </fieldset>
+        )}
         {selectedTab === EditConnectorTabs.Test && renderTestTab()}
         {selectedTab === EditConnectorTabs.Rules && renderConnectorRulesList()}
       </EuiFlyoutBody>

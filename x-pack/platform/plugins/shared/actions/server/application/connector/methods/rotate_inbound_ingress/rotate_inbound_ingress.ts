@@ -10,6 +10,7 @@ import { connectorTypeHasInboundEvents } from '@kbn/connector-specs';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { i18n } from '@kbn/i18n';
 import { isUndefined, omitBy } from 'lodash';
+import { ensureConnectorAccess } from '../../../../lib/connector_access_control';
 
 import type { RawAction } from '../../../../types';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
@@ -33,6 +34,7 @@ export async function rotateInboundIngress({
     spaceId !== DEFAULT_SPACE_ID ? { namespace: spaceId } : {}
   );
 
+  await ensureConnectorAccess(context, rawAction.attributes, 'edit');
   const actionTypeId = rawAction.attributes.actionTypeId;
   if (!connectorTypeHasInboundEvents(actionTypeId)) {
     throw Boom.badRequest(

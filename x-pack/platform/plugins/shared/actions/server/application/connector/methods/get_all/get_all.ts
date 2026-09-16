@@ -12,6 +12,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { omit } from 'lodash';
+import { getConnectorPermissions } from '../../../../../common/access_control';
 import type { ActionTypeRegistry } from '../../../../action_type_registry';
 import type { InMemoryConnector } from '../../../..';
 import type { SavedObjectClientForFind } from '../../../../data/connector/types/params';
@@ -24,6 +25,7 @@ import { getAuthMode } from '../../lib/get_auth_mode';
 import type { ConnectorWithExtraFindData } from '../../types';
 import type { GetAllUnsecuredParams } from './types/params';
 interface GetAllHelperOpts {
+  profileId?: string;
   auditLogger?: AuditLogger;
   esClient: ElasticsearchClient;
   inMemoryConnectors: InMemoryConnector[];
@@ -51,6 +53,7 @@ export async function getAll({
   }
 
   return await getAllHelper({
+    profileId: await context.getCurrentUserProfileId?.(context.request),
     auditLogger: context.auditLogger,
     esClient: context.scopedClusterClient.asInternalUser,
     inMemoryConnectors: includeSystemActions
@@ -88,6 +91,7 @@ export async function getAllUnsecured({
 }
 
 async function getAllHelper({
+  profileId,
   auditLogger,
   esClient,
   inMemoryConnectors,
@@ -99,14 +103,16 @@ async function getAllHelper({
 }: GetAllHelperOpts): Promise<ConnectorWithExtraFindData[]> {
   const savedObjectsActions = (
     await findConnectorsSo({ savedObjectsClient, namespace })
-  ).saved_objects.map((rawAction) => {
-    const connector = connectorFromSavedObject(
-      rawAction,
-      isConnectorDeprecated(rawAction.attributes),
-      connectorTypeRegistry.isDeprecated(rawAction.attributes.actionTypeId)
-    );
-    return omit(connector, 'secrets');
-  });
+  ).saved_objects
+    .filter(({ attributes }) => getConnectorPermissions(attributes, profileId).read)
+    .map((rawAction) => {
+      const connector = connectorFromSavedObject(
+        rawAction,
+        isConnectorDeprecated(rawAction.attributes),
+        connectorTypeRegistry.isDeprecated(rawAction.attributes.actionTypeId)
+      );
+      return omit(connector, 'secrets');
+    });
 
   if (auditLogger) {
     savedObjectsActions.forEach(({ id }) =>

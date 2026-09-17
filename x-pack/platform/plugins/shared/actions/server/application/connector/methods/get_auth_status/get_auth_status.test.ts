@@ -192,7 +192,7 @@ describe('getAuthStatus()', () => {
       expect.objectContaining({
         type: 'action',
         perPage: 10000,
-        fields: ['authMode'],
+        fields: ['authMode', 'owner_id', 'access_control'],
       })
     );
   });

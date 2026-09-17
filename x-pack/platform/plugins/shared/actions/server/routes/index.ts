@@ -8,6 +8,7 @@
 import type { IRouter, KibanaRequest } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger, CoreSetup } from '@kbn/core/server';
+import { connectorAccessControlRoutes } from './connector/access_control';
 import { getAllConnectorsRoute } from './connector/get_all';
 import { getAllConnectorsIncludingSystemRoute } from './connector/get_all_system';
 import { connectorAuthStatusRoute } from './connector/auth_status';
@@ -62,6 +63,7 @@ export function defineRoutes(opts: RouteOptions) {
     inboundEvents,
   } = opts;
 
+  connectorAccessControlRoutes(opts);
   createConnectorRoute(router, licenseState);
   deleteConnectorRoute(router, licenseState);
   getConnectorRoute(router, licenseState);

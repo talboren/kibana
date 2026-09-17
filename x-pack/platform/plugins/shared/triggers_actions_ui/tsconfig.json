@@ -12,6 +12,10 @@
     "../../../../../typings/**/*"
   ],
   "kbn_references": [
+    "@kbn/user-profile-components",
+    "@kbn/react-hooks",
+    "@kbn/entity-access-control-ui",
+    "@kbn/entity-access-control",
     "@kbn/core",
     "@kbn/human-readable-id",
     "@kbn/alerting-plugin",

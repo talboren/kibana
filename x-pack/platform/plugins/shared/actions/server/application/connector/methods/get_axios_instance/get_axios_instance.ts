@@ -7,6 +7,7 @@
 
 import type { AxiosInstance } from 'axios';
 import type { AuthMode } from '@kbn/connector-specs';
+import { ensureConnectorAccess } from '../../../../lib/connector_access_control';
 import { isWorkflowsOnlyConnectorType } from '../../../../lib/single_file_connectors/is_workflows_only_connector';
 import type { RawAction } from '../../../../types';
 import { getActionKibanaPrivileges } from '../../../../lib/get_action_kibana_privileges';
@@ -39,6 +40,7 @@ export async function getAxiosInstance(
     getCurrentUserProfileId,
   } = context;
 
+  let accessSubject: RawAction | undefined;
   let actionTypeId: string | undefined;
   let authMode: AuthMode | undefined;
 
@@ -55,6 +57,7 @@ export async function getAxiosInstance(
         connectorId
       );
 
+      accessSubject = attributes;
       actionTypeId = attributes.actionTypeId;
       authMode = attributes.authMode;
     }
@@ -76,6 +79,8 @@ export async function getAxiosInstance(
     additionalPrivileges: getActionKibanaPrivileges(context, actionTypeId),
     actionTypeId,
   });
+
+  if (accessSubject) await ensureConnectorAccess(context, accessSubject, 'execute');
 
   // check to see if it's in memory connector before fetching secrets
   const inMemoryAction = inMemoryConnectors.find(

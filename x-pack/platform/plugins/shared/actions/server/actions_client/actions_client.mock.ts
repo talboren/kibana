@@ -13,6 +13,8 @@ export type ActionsClientMock = jest.Mocked<ActionsClientContract>;
 
 const createActionsClientMock = () => {
   const mocked: ActionsClientMock = {
+    getAccessControl: jest.fn(),
+    updateAccessControl: jest.fn(),
     create: jest.fn(),
     get: jest.fn(),
     delete: jest.fn(),

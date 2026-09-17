@@ -810,6 +810,7 @@ export class ActionsPlugin
 
     actionExecutor!.initialize({
       logger,
+      getCurrentUserProfileId,
       eventLogger: this.eventLogger!,
       spaces: plugins.spaces?.spacesService,
       security: core.security,

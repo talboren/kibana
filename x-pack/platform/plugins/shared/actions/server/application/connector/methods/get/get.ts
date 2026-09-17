@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { ensureConnectorAccess } from '../../../../lib/connector_access_control';
 import { getConnectorSo } from '../../../../data/connector';
 import { connectorSchema } from '../../schemas';
 import type { Connector } from '../../types';
@@ -71,6 +72,7 @@ export async function get({
       unsecuredSavedObjectsClient: context.unsecuredSavedObjectsClient,
       id,
     });
+    await ensureConnectorAccess(context, result.attributes, 'read');
     const authMode = getAuthMode(result.attributes.authMode as Connector['authMode'] | undefined);
 
     context.auditLogger?.log(

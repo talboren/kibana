@@ -1,0 +1,46 @@
+LMDB cache disabled for @kbn/swc-register (CODEX_SANDBOX is set)
+ debg KIBANA_CI_STATS_CONFIG environment variable not found, disabling CiStatsReporter
+ sill cwd: /private/tmp/kibana-workflows-disabled
+ sill testFiles: /private/tmp/kibana-workflows-disabled/src/platform/plugins/shared/workflows_management/server/connectors/workflows/index.test.ts
+ sill commonTestFiles: /private/tmp/kibana-workflows-disabled/src/platform/plugins/shared/workflows_management/server/connectors/workflows/index.test.ts
+ sill no config provided, found /private/tmp/kibana-workflows-disabled/src/platform/plugins/shared/workflows_management/server/jest.config.js
+ debg Setting up Jest with shared cache directory...
+ info node scripts/jest src/platform/plugins/shared/workflows_management/server/connectors/workflows/index.test.ts --runInBand --verbose --config /private/tmp/kibana-workflows-disabled/src/platform/plugins/shared/workflows_management/server/jest.config.js
+ debg Setting up Jest with shared cache directory: --config {"preset":"@kbn/test/jest_node","rootDir":"/private/tmp/kibana-workflows-disabled","roots":["<rootDir>/src/platform/plugins/shared/workflows_management/server"],"coverageDirectory":"<rootDir>/target/kibana-coverage/jest/src/platform/plugins/shared/workflows_management/server","coverageReporters":["text","html"],"collectCoverageFrom":["<rootDir>/src/platform/plugins/shared/workflows_management/server/**/*.{js,ts,tsx}"],"id":"kbn-test-jest","cacheDirectory":"/private/tmp/kibana-workflows-disabled/data/jest-cache"} src/platform/plugins/shared/workflows_management/server/connectors/workflows/index.test.ts --runInBand --verbose
+PASS src/platform/plugins/shared/workflows_management/server/connectors/workflows/index.test.ts (5.072 s)
+  Workflows Connector
+    getConnectorType
+      ✓ should return correct connector type configuration (1 ms)
+      ✓ should have correct validation schemas (1 ms)
+      workflow scheduling
+        ✓ skips a disabled workflow without errors or scheduling (summaryMode=true) (2 ms)
+        ✓ skips a disabled workflow without errors or scheduling (summaryMode=false)
+        ✓ schedules an enabled workflow (summaryMode=true) (1 ms)
+        ✓ schedules an enabled workflow (summaryMode=false) (1 ms)
+        ✓ still reports a missing workflow as an error (3 ms)
+        ✓ still reports an invalid workflow as an error (1 ms)
+        ✓ stops per-alert scheduling when the workflow is disabled after a successful schedule (1 ms)
+        ✓ preserves earlier per-alert errors when the workflow is then disabled
+    executor
+      ✓ should schedule workflow successfully (1 ms)
+      ✓ should skip execution when no alerts are provided
+      ✓ should throw error for unsupported subAction
+      ✓ should handle schedule workflows service errors
+    getWorkflowsConnectorAdapter
+      ✓ should have correct connector type ID
+      ✓ should build action params correctly
+      ✓ should handle missing workflowId gracefully (1 ms)
+      ✓ should default alertStates to new=true, ongoing=false, recovered=false when not provided
+      ✓ should include ongoing and recovered alerts when alertStates enables them
+      ✓ should exclude new alerts when alertStates.new is false
+    resolveAlertStates
+      ✓ should return defaults when no alertStates provided
+      ✓ should return defaults when undefined is passed
+      ✓ should respect explicit values
+      ✓ should fill in missing fields with defaults
+
+Test Suites: 1 passed, 1 total
+Tests:       24 passed, 24 total
+Snapshots:   0 total
+Time:        5.14 s
+Ran all test suites matching /src\/platform\/plugins\/shared\/workflows_management\/server\/connectors\/workflows\/index.test.ts/i.

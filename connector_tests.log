@@ -1,0 +1,13 @@
+LMDB cache disabled for @kbn/swc-register (CODEX_SANDBOX is set)
+ info node scripts/jest src/platform/plugins/shared/workflows_management/server/connectors/workflows --runInBand --config /private/tmp/kibana-workflows-disabled/src/platform/plugins/shared/workflows_management/server/jest.config.js
+PASS src/platform/plugins/shared/workflows_management/server/connectors/workflows/index.test.ts
+PASS src/platform/plugins/shared/workflows_management/server/connectors/workflows/service.test.ts
+PASS src/platform/plugins/shared/workflows_management/server/connectors/workflows/api.test.ts
+PASS src/platform/plugins/shared/workflows_management/server/connectors/workflows/validators.test.ts
+PASS src/platform/plugins/shared/workflows_management/server/connectors/workflows/utils.test.ts
+
+Test Suites: 5 passed, 5 total
+Tests:       63 passed, 63 total
+Snapshots:   0 total
+Time:        4.445 s, estimated 10 s
+Ran all test suites matching /src\/platform\/plugins\/shared\/workflows_management\/server\/connectors\/workflows/i.

@@ -1,0 +1,82 @@
+LMDB cache disabled for @kbn/swc-register (CODEX_SANDBOX is set)
+ info node scripts/jest src/platform/plugins/shared/workflows_management/server/connectors/workflows/index.test.ts --runInBand --config /private/tmp/kibana-workflows-disabled/src/platform/plugins/shared/workflows_management/server/jest.config.js
+FAIL src/platform/plugins/shared/workflows_management/server/connectors/workflows/index.test.ts (9.601 s)
+  Workflows Connector
+    getConnectorType
+      ✓ should return correct connector type configuration (2 ms)
+      ✓ should have correct validation schemas (1 ms)
+      workflow scheduling
+        ✕ skips a disabled workflow without errors or scheduling (summaryMode=true) (2 ms)
+        ✕ skips a disabled workflow without errors or scheduling (summaryMode=false) (2 ms)
+        ✓ schedules an enabled workflow (summaryMode=true) (1 ms)
+        ✓ schedules an enabled workflow (summaryMode=false)
+        ✓ still reports a missing workflow as an error
+        ✓ still reports an invalid workflow as an error (1 ms)
+    executor
+      ✓ should schedule workflow successfully
+      ✓ should skip execution when no alerts are provided
+      ✓ should throw error for unsupported subAction (1 ms)
+      ✓ should handle schedule workflows service errors
+    getWorkflowsConnectorAdapter
+      ✓ should have correct connector type ID (1 ms)
+      ✓ should build action params correctly
+      ✓ should handle missing workflowId gracefully
+      ✓ should default alertStates to new=true, ongoing=false, recovered=false when not provided
+      ✓ should include ongoing and recovered alerts when alertStates enables them (1 ms)
+      ✓ should exclude new alerts when alertStates.new is false
+    resolveAlertStates
+      ✓ should return defaults when no alertStates provided
+      ✓ should return defaults when undefined is passed
+      ✓ should respect explicit values
+      ✓ should fill in missing fields with defaults
+
+  ● Workflows Connector › getConnectorType › workflow scheduling › skips a disabled workflow without errors or scheduling (summaryMode=true)
+
+    Unable to schedule workflow test-workflow-id. Error: Workflow is disabled: test-workflow-id. Enable the workflow to run it.
+
+      13 |   const responseData = (error as { response?: { data?: { message?: string } } }).response?.data;
+      14 |   const errorMessage = responseData?.message || error.message;
+    > 15 |   return new Error(`${message}. Error: ${errorMessage}`);
+         |          ^
+      16 | };
+      17 |
+
+      at createServiceError (src/platform/plugins/shared/workflows_management/server/connectors/workflows/utils.ts:15:10)
+      at Object.scheduleWorkflow (src/platform/plugins/shared/workflows_management/server/connectors/workflows/service.ts:124:29)
+      at Object.run (src/platform/plugins/shared/workflows_management/server/connectors/workflows/api.ts:35:27)
+      at executor (src/platform/plugins/shared/workflows_management/server/connectors/workflows/index.ts:206:12)
+      at src/platform/plugins/shared/workflows_management/server/connectors/workflows/index.test.ts:133:26
+
+  ● Workflows Connector › getConnectorType › workflow scheduling › skips a disabled workflow without errors or scheduling (summaryMode=false)
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 2
+    + Received  + 2
+
+      Object {
+        "actionId": "test-action-id",
+        "data": Object {
+    -     "status": "skipped",
+    -     "workflowRunId": "skipped-disabled",
+    +     "status": "failed",
+    +     "workflowRunId": "per-alert-scheduling-0-success-2-errors",
+        },
+        "status": "ok",
+      }
+
+      135 |           );
+      136 |
+    > 137 |           expect(result).toEqual({
+          |                          ^
+      138 |             status: 'ok',
+      139 |             actionId: 'test-action-id',
+      140 |             data: { workflowRunId: 'skipped-disabled', status: 'skipped' },
+
+      at src/platform/plugins/shared/workflows_management/server/connectors/workflows/index.test.ts:137:26
+
+Test Suites: 1 failed, 1 total
+Tests:       2 failed, 20 passed, 22 total
+Snapshots:   0 total
+Time:        9.662 s
+Ran all test suites matching /src\/platform\/plugins\/shared\/workflows_management\/server\/connectors\/workflows\/index.test.ts/i.

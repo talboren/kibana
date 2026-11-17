@@ -314,7 +314,8 @@ export interface ProjectNavigationLinkList {
 
 /**
  * Everything one feature contributes to an existing deep link's hover popover. One per target.
- * Chrome attaches this to primary and footer hover only, not More.
+ * Chrome attaches this to primary and footer hover only, not More. On a panel opener, the lists
+ * follow its sections in both the side panel and the hover popover.
  */
 export interface ProjectNavigationLinks {
   id: string;

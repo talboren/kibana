@@ -135,19 +135,21 @@ export const attachPopoverSections = (
 
   const attach = (item: MenuItem): MenuItem => {
     const placement = byNodeId.get(item.id);
-    // v1 skips nodes that already have `sections`. Intended later: tree children, then lists, then footer.
-    if (!placement || (item.sections?.length ?? 0) > 0) {
+    if (!placement) {
       return item;
     }
-    return {
-      ...item,
-      popoverSections: placement.lists.map((list) => ({
-        id: list.id,
-        label: list.title,
-        items: list.items,
-        isPaginated: true,
-      })),
-    };
+    const listSections = placement.lists.map((list) => ({
+      id: list.id,
+      label: list.title,
+      items: list.items,
+      isPaginated: true,
+    }));
+    // Panel openers render `sections` in both the side panel and the hover popover, so the lists
+    // follow the tree children there instead of replacing them.
+    if (item.sections?.length) {
+      return { ...item, sections: [...item.sections, ...listSections] };
+    }
+    return { ...item, popoverSections: listSections };
   };
 
   return {

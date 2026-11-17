@@ -159,7 +159,7 @@ describe('attachPopoverSections', () => {
     ]);
   });
 
-  it('v1 skips a node that already has sections', async () => {
+  it('appends lists after the sections of a panel opener', async () => {
     const resolved = await resolveNonEmpty(createRegistration());
     const existing = [{ id: 'static', items: [{ id: 'child', label: 'Child', href: '/child' }] }];
     const attached = attachPopoverSections(
@@ -168,7 +168,22 @@ describe('attachPopoverSections', () => {
     );
 
     expect(attached.navItems.primaryItems[0].popoverSections).toBeUndefined();
-    expect(attached.navItems.primaryItems[0].sections).toEqual(existing);
+    expect(attached.navItems.primaryItems[0].sections).toEqual([
+      ...existing,
+      {
+        id: 'recentlyViewed',
+        label: 'Recently viewed',
+        items: [
+          {
+            id: 'recentlyViewed:dash-1',
+            href: '/app/dashboards#/dash-1',
+            label: 'One',
+          },
+        ],
+        isPaginated: true,
+      },
+    ]);
+    expect(attached.navItems.overflowItems?.[0].sections).toEqual(existing);
   });
 });
 
